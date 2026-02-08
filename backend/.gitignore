@@ -80,7 +80,4 @@ Desktop.ini
 /phar/
 
 # .env
-backend/.env
-
-# User-specific stuff
-**/.idea/workspace.xml
+/.env
