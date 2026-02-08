@@ -1,0 +1,77 @@
+<?php
+
+namespace App\Bootstrap;
+
+use App\AppModule;
+use App\Auth\Exceptions\ValidationException;
+use App\Config\ConfigService;
+use App\Exceptions\Domain\BadRequestException;
+use App\Exceptions\Domain\ForbiddenException;
+use App\Exceptions\Domain\NotFoundException;
+use App\Exceptions\Domain\UnauthorizedException;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class Application {
+    private AppModule $appModule;
+    private string $environment;
+
+    public function __construct() {
+        $configService = new ConfigService();
+
+        $this->environment = $configService->get('APP_ENV', 'production');
+        $this->initialize();
+    }
+
+    private function initialize(): void {
+        // Инициализируем модуль приложения
+        $this->appModule = new AppModule();
+
+        // Настраиваем CORS
+        $this->setupCors();
+    }
+
+    private function setupCors(): void {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+        header('Access-Control-Allow-Credentials: true');
+
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            http_response_code(200);
+            exit;
+        }
+    }
+
+    /**
+     * @throws UnauthorizedException
+     * @throws NotFoundException
+     * @throws ForbiddenException
+     * @throws BadRequestException
+     * @throws ValidationException
+     */
+    public function run(): void {
+        $request = Request::createFromGlobals();
+        $response = $this->handleRequest($request);
+        $response->send();
+    }
+
+    /**
+     * @throws UnauthorizedException
+     * @throws NotFoundException
+     * @throws ForbiddenException
+     * @throws BadRequestException
+     * @throws ValidationException
+     */
+    private function handleRequest(Request $request): Response {
+        return $this->appModule->handle($request);
+    }
+
+    public function getAppModule(): AppModule {
+        return $this->appModule;
+    }
+
+    public function getEnvironment(): string {
+        return $this->environment;
+    }
+}
