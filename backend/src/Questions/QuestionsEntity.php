@@ -16,15 +16,9 @@ class QuestionsEntity
         array $answers,
         int $correctAnswerIndex
     ) {
-        self::validateTitle($title);
-        self::validateAnswers($answers);
-        foreach ($answers as $answer) {
-            self::validateAnswer($answer);
-        }
-
-        $this->title = $title;
-        $this->answers = $answers;
-        $this->correctAnswerIndex = $correctAnswerIndex;
+        $this->setTitle($title);
+        $this->setAnswers($answers);
+        $this->setCorrectAnswerIndex($correctAnswerIndex);
 
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
@@ -83,13 +77,14 @@ class QuestionsEntity
         return $this->answers;
     }
 
-    private function setCorrectAnswerIndex(int $index): void {
-        if ($index < 0 || $index >= count($this->answers)) {
-            throw new \InvalidArgumentException(
-                sprintf('Correct answer index must be between 0 and %d', count($this->answers) - 1)
-            );
+    public static function validateAnswerIndex(int $index): void {
+        if ($index < 1 || $index >= 4) {
+            throw new \InvalidArgumentException('Correct answer index must be between 1 and 4');
         }
+    }
 
+    private function setCorrectAnswerIndex(int $index): void {
+        QuestionsEntity::validateAnswerIndex($index);
         $this->correctAnswerIndex = $index;
     }
 
@@ -106,11 +101,45 @@ class QuestionsEntity
         return $this->id;
     }
 
+    public function setId(int $id): void {
+        $this->id = $id;
+    }
+
     public function getCreatedAt(): \DateTime {
         return $this->createdAt;
     }
 
     public function getUpdatedAt(): \DateTime {
         return $this->updatedAt;
+    }
+
+    public static function fromArray(array $data): self {
+        $question = new self(
+            $data['title'],
+            $data['answers'],
+            $data['correctAnswerIndex']
+        );
+
+        if (isset($data['id'])) {
+            $question->setId((int)$data['id']);
+        }
+
+        if (isset($data['createdAt']) && is_string($data['createdAt'])) {
+            $question->createdAt = \DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $data['createdAt']);
+        }
+
+        if (isset($data['updatedAt']) && is_string($data['updatedAt'])) {
+            $question->updatedAt = \DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $data['updatedAt']);
+        }
+
+        return $question;
+    }
+
+    public function toArray(): array {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'answers' => $this->answers,
+        ];
     }
 }

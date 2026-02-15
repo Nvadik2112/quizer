@@ -12,12 +12,11 @@ class CreateQuestionDto
 
     }
 
-    public static function fromArray(array $data): self
-    {
+    public static function fromArray(array $data): self {
         return new self(
-            $data['title'],
-            $data['answers'],
-            $data['correctAnswerIndex']
+            $data['title'] ?? '',
+            $data['answers'] ?? [],
+            $data['correctAnswerIndex'] ?? ''
         );
     }
 

@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Questions\Dto;
+
+use App\Questions\QuestionsEntity;
+
+class UpdateQuestionDto {
+    public function __construct(
+        public ?string $title = null,
+        public ?array $answers = null,
+        public ?int $correctAnswerIndex = null
+    ) {
+        if ($this->title !== null) QuestionsEntity::validateTitle($this->title);
+        if ($this->answers !== null) QuestionsEntity::validateAnswers($this->answers);
+        if ($this->correctAnswerIndex !== null) QuestionsEntity::validateAnswers($this->answers);
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['title'] ?? null,
+            $data['answers'] ?? null,
+            $data['correctAnswerIndex'] ?? null
+        );
+    }
+
+    public function hasChanges(): bool
+    {
+        return $this->title !== null ||
+            $this->answers !== null ||
+            $this->correctAnswerIndex !== null;
+    }
+}

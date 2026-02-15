@@ -196,4 +196,16 @@ class UsersService
             throw new ForbiddenException('Email или username с таким именем существует');
         }
     }
+
+    /**
+     * @throws NotFoundException
+     */
+    public function delete(int $userId): void
+    {
+        $this->findById($userId);
+
+        $sql = "DELETE FROM users WHERE id = :id";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute(['id' => $userId]);
+    }
 }

@@ -14,14 +14,10 @@ set_exception_handler(function ($e) {
 set_error_handler(/**
  * @throws ErrorException
  */ function ($errno, $errstr, $errfile, $errline) {
-        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 });
 
-try {
-    DataBaseModule::runMigrations();
-} catch (Exception $e) {
-    error_log('Migration error: ' . $e->getMessage());
-}
+DataBaseModule::runMigrations();
 
 $app = new Application();
 $app->run();
