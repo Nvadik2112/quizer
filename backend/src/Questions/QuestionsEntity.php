@@ -2,6 +2,8 @@
 
 namespace App\Questions;
 
+use InvalidArgumentException;
+
 class QuestionsEntity
 {
     private ?int $id = null;
@@ -26,7 +28,7 @@ class QuestionsEntity
 
     public static function validateTitle(string $title): void {
         if (strlen($title) < 2 || strlen($title) > 150) {
-            throw new \InvalidArgumentException('Title must be between 2 and 150 characters');
+            throw new InvalidArgumentException('Title must be between 2 and 150 characters');
         }
     }
 
@@ -78,8 +80,15 @@ class QuestionsEntity
     }
 
     public static function validateAnswerIndex(int $index): void {
-        if ($index < 1 || $index >= 4) {
-            throw new \InvalidArgumentException('Correct answer index must be between 1 and 4');
+        // Проверка на целое число
+        $intIndex = filter_var($index, FILTER_VALIDATE_INT);
+
+        if ($intIndex === false) {
+            throw new \InvalidArgumentException('correctAnswerIndex must be a valid integer');
+        }
+
+        if ($intIndex < 0 || $intIndex > 3) {
+            throw new \InvalidArgumentException('Correct answer index must be between 0 and 3');
         }
     }
 
@@ -113,23 +122,36 @@ class QuestionsEntity
         return $this->updatedAt;
     }
 
+    /**
+     * @throws \Exception
+     */
     public static function fromArray(array $data): self {
+        $answers = $data['answers'];
+
+        if (is_string($answers)) {
+            $answersString = trim($answers, '{}');
+            $answers = str_getcsv($answersString, ',', '"');
+            $answers = array_map(function($item) {
+                return stripslashes($item);
+            }, $answers);
+        }
+
         $question = new self(
             $data['title'],
-            $data['answers'],
-            $data['correctAnswerIndex']
+            $answers,
+            $data['correct_answer_index']
         );
 
         if (isset($data['id'])) {
             $question->setId((int)$data['id']);
         }
 
-        if (isset($data['createdAt']) && is_string($data['createdAt'])) {
-            $question->createdAt = \DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $data['createdAt']);
+        if (isset($data['created_at']) && is_string($data['created_at'])) {
+            $question->createdAt = new \DateTime($data['created_at']);
         }
 
-        if (isset($data['updatedAt']) && is_string($data['updatedAt'])) {
-            $question->updatedAt = \DateTime::createFromFormat('Y-m-d\TH:i:s.u\Z', $data['updatedAt']);
+        if (isset($data['updated_at']) && is_string($data['updated_at'])) {
+            $question->updatedAt = new \DateTime($data['updated_at']);
         }
 
         return $question;

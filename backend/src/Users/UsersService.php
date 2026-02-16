@@ -200,12 +200,14 @@ class UsersService
     /**
      * @throws NotFoundException
      */
-    public function delete(int $userId): void
+    public function delete(int $userId): UserEntity
     {
-        $this->findById($userId);
+        $user = $this->findById($userId);
 
         $sql = "DELETE FROM users WHERE id = :id";
         $stmt = $this->connection->prepare($sql);
         $stmt->execute(['id' => $userId]);
+
+        return $user;
     }
 }

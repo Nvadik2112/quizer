@@ -3,11 +3,11 @@
 namespace App\Questions;
 
 use App\Exceptions\Domain\BadRequestException;
-use App\Exceptions\Domain\ForbiddenException;
 use App\Exceptions\Domain\NotFoundException;
 use App\Questions\Dto\CreateQuestionDto;
 use App\Questions\Dto\UpdateQuestionDto;
-use App\Questions\QuestionsEntity;
+
+use Exception;
 use PDO;
 
 class QuestionsService
@@ -27,15 +27,23 @@ class QuestionsService
     {
         $dto = CreateQuestionDto::fromArray($data);
 
-        $sql = "INSERT INTO questions (title, answers, correctAnswerIndex, created_at, updated_at)
-            VALUES (:title, :answers, :correctAnswerIndex, NOW(), NOW())";
+        $dto->validate();
+
+        $answersArray = '{' . implode(',', array_map(function($answer) {
+                $answer = str_replace('"', '\\"', $answer);
+                $answer = str_replace('\\', '\\\\', $answer);
+                return '"' . $answer . '"';
+            }, $dto->answers)) . '}';
+
+        $sql = "INSERT INTO questions (title, answers, correct_answer_index, created_at, updated_at)
+            VALUES (:title, :answers::text[], :correct_answer_index, NOW(), NOW())";
 
         $stmt = $this->connection->prepare($sql);
 
         $stmt->execute([
             'title' => $dto->title,
-            'answers' => $dto->answers,
-            'correctAnswerIndex' => $dto->correctAnswerIndex,
+            'answers' => $answersArray,
+            'correct_answer_index' => $dto->correctAnswerIndex,
         ]);
 
         $questionId = (int)$this->connection->lastInsertId();
@@ -49,6 +57,7 @@ class QuestionsService
 
     /**
      * @throws NotFoundException
+     * @throws Exception
      */
     public function findById(int $id): QuestionsEntity
     {
@@ -105,5 +114,20 @@ class QuestionsService
         $stmt->execute(['id' => $questionId]);
 
         return $question;
+    }
+
+    /**
+     * @throws NotFoundException
+     */
+    public function checkAnswerIndex(int $questionId, int $index): bool
+    {
+        $question = $this->findById($questionId);
+        QuestionsEntity::validateAnswerIndex($index);
+
+        if ($question['correctAnswerIndex'] === $index) {
+            return true;
+        }
+
+        return false;
     }
 }

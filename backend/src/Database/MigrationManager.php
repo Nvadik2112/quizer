@@ -21,8 +21,6 @@ class MigrationManager
             $this->migrationsPath = rtrim($migrationsPath, '/') . '/';
         }
 
-        $this->migrationsPath = rtrim($this->migrationsPath, '/') . '/';
-
         $this->createMigrationsTable();
     }
 
@@ -76,7 +74,12 @@ class MigrationManager
 
         try {
             foreach ($pendingMigrations as $filePath) {
-                $this->applyMigration($filePath);
+                try {
+                    $this->applyMigration($filePath);
+                } catch (\Exception $e) {
+                    error_log("Migration failed: " . $e->getMessage());
+                    throw $e;
+                }
             }
             $this->connection->commit();
         } catch (\Exception $e) {

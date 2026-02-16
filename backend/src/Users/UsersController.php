@@ -3,7 +3,6 @@
 namespace App\Users;
 
 use App\Auth\Guards\JwtGuard;
-use App\Exceptions\Domain\BadRequestException;
 use App\Exceptions\Domain\ForbiddenException;
 use App\Exceptions\Domain\NotFoundException;
 use Exception;
@@ -29,26 +28,11 @@ class UsersController
      */
     public function getProfile(Request $request): JsonResponse
     {
-            $user = $this->jwtGuard->validate($request);
-            $userData = $this->usersService->findById($user['id']);
+        $user = $this->jwtGuard->validate($request);
+        $userData = $this->usersService->findById($user['id']);
 
-            return new JsonResponse($userData->toArray());
+        return new JsonResponse($userData->toArray());
     }
-
-    /*#[Route('/users/me/wishes', methods: ['GET'])]
-    public function getProfileWishes(Request $request): JsonResponse
-    {
-        try {
-            $user = $this->jwtGuard->validate($request);
-            $wishes = $this->usersService->findWishesByUser($user->getId());
-
-            return new JsonResponse($wishes);
-       } catch (\Exception $e) {
-            return new JsonResponse([
-                'error' => $e->getMessage()
-            ], $e->getCode() ?: 401);
-        }
-    }*/
 
     /**
      * @throws NotFoundException
@@ -59,19 +43,6 @@ class UsersController
 
         return new JsonResponse($user->toArray());
     }
-   /*#[Route('/users/{id}/wishes', methods: ['GET'])]
-     public function getUserWishes(int $id): JsonResponse
-     {
-         try {
-             $wishes = $this->usersService->findWishesByUser($id);
-
-             return new JsonResponse($wishes);
-         } catch (\Exception $e) {
-             return new JsonResponse([
-                 'error' => $e->getMessage()
-             ], $e->getCode() ?: Status::NOT_FOUND);
-         }
-     }*/
 
     /**
      * @throws NotFoundException
@@ -80,7 +51,6 @@ class UsersController
      */
     public function updateMyProfile(Request $request): JsonResponse
     {
-
         $user = $this->jwtGuard->validate($request);
         $data = json_decode($request->getContent(), true) ?: [];
 
@@ -94,20 +64,13 @@ class UsersController
 
     /**
      * @throws NotFoundException
-     * @throws BadRequestException
      * @throws Exception
      */
-    public function searchUsers(Request $request): JsonResponse
+    public function deleteUser(Request $request, int $id): JsonResponse
     {
-        $jwtGuard = new JwtGuard();
-        $jwtGuard->validate($request);
+        $this->jwtGuard->validate($request);
+        $deletedUser = $this->usersService->delete($id);
 
-        $query = $request->query->get('query', '');
-        $users = $this->usersService->search($query);
-        $usersArray = array_map(function($user) {
-                return $user->toArray();
-            }, $users);
-
-        return new JsonResponse($usersArray);
+        return new JsonResponse($deletedUser->toArray());
     }
 }

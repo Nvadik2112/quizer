@@ -10,6 +10,7 @@ use App\Exceptions\Domain\BadRequestException;
 use App\Exceptions\Domain\ForbiddenException;
 use App\Exceptions\Domain\NotFoundException;
 use App\Exceptions\Domain\UnauthorizedException;
+use App\Questions\QuestionsModule;
 use App\Users\UsersModule;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,19 +20,15 @@ class AppModule
 {
     private AuthModule $authModule;
     private UsersModule $usersModule;
+    private QuestionsModule $questionsModule;
 
     public function __construct()
     {
         DataBaseModule::getInstance();
 
-        $configService = new ConfigService();
-
-        if (($configService->get('APP_ENV') ?? 'production') === 'development') {
-            DataBaseModule::runMigrations();
-        }
-
         $this->authModule = AuthModule::getInstance();
         $this->usersModule = UsersModule::getInstance();
+        $this->questionsModule = QuestionsModule::getInstance();
     }
 
     /**
@@ -61,6 +58,7 @@ class AppModule
     {
         $authController = $this->authModule->getAuthController();
         $usersController = $this->usersModule->getUsersController();
+        $questionsController = $this->questionsModule->getQuestionsController();
 
         if ($method === 'GET') {
             if ($path === '/users/me') {
@@ -71,8 +69,8 @@ class AppModule
                 return $usersController->getUser((int)$matches[1]);
             }
 
-            if ($path === '/users/find') {
-                return $usersController->searchUsers($request);
+            if (preg_match('#^/questions/(\d+)$#', $path, $matches)) {
+                return $questionsController->getQuestion((int)$matches[1]);
             }
         }
 
@@ -84,11 +82,29 @@ class AppModule
             if ($path === '/signup') {
                 return $authController->signup($request);
             }
+
+            if ($path === '/questions') {
+                return $questionsController->createQuestion($request);
+            }
         }
 
         if ($method === 'PATCH') {
             if ($path === '/users/me') {
                 return $usersController->updateMyProfile($request);
+            }
+
+            if (preg_match('#^/questions/(\d+)$#', $path, $matches)) {
+                return $questionsController->updateQuestion($request, (int)$matches[1]);
+            }
+        }
+
+        if ($method === 'DELETE') {
+            if (preg_match('#^/users/(\d+)$#', $path, $matches)) {
+                return $usersController->deleteUser($request, (int)$matches[1]);
+            }
+
+            if (preg_match('#^/questions/(\d+)$#', $path, $matches)) {
+                return $questionsController->deleteQuestion($request, (int)$matches[1]);
             }
         }
 

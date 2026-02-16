@@ -10,9 +10,21 @@ class UpdateQuestionDto {
         public ?array $answers = null,
         public ?int $correctAnswerIndex = null
     ) {
-        if ($this->title !== null) QuestionsEntity::validateTitle($this->title);
-        if ($this->answers !== null) QuestionsEntity::validateAnswers($this->answers);
-        if ($this->correctAnswerIndex !== null) QuestionsEntity::validateAnswers($this->answers);
+        if ($this->title !== null) {
+            QuestionsEntity::validateTitle($this->title);
+        }
+
+        if ($this->answers !== null) {
+            QuestionsEntity::validateAnswers($this->answers);
+
+            foreach ($this->answers as $answer) {
+                QuestionsEntity::validateAnswer($answer);
+            }
+        }
+
+        if ($this->correctAnswerIndex !== null) {
+            QuestionsEntity::validateAnswerIndex($this->correctAnswerIndex);
+        }
     }
 
     public static function fromArray(array $data): self

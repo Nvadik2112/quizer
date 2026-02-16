@@ -4,7 +4,7 @@ namespace App\Users;
 
 use App\Auth\Guards\JwtGuard;
 use App\Hash\HashService;
-use App\Database\DataBaseModule;
+use App\Database\DataBaseModule as DataBaseModule;
 
 class UsersModule {
     private static ?UsersModule $instance = null;

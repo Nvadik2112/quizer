@@ -28,8 +28,64 @@ try {
         echo "   ❌ Ошибка: " . $e->getMessage() . "\n";
     }
 
-    // 2. Проверяем таблицу users
-    echo "\n2. Таблица users:\n";
+    // 2. Проверяем таблицу questions (ИСПРАВЛЕНО)
+    echo "\n2. Таблица questions:\n";
+    try {
+        $stmt = $pdo->query("SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = current_schema()
+            AND table_name = 'questions'
+        )");
+
+        if ($stmt->fetchColumn()) {
+            echo "   ✅ Таблица questions существует\n";
+
+            // Структура таблицы
+            $columns = $pdo->query("
+                SELECT column_name, data_type, is_nullable
+                FROM information_schema.columns 
+                WHERE table_schema = current_schema()
+                AND table_name = 'questions'
+                ORDER BY ordinal_position
+            ")->fetchAll();
+
+            echo "   Структура:\n";
+            foreach ($columns as $col) {
+                echo "   - {$col['column_name']} ({$col['data_type']})\n";
+            }
+
+            // Количество записей
+            $count = $pdo->query("SELECT COUNT(*) as count FROM questions")->fetch();
+            echo "   Записей: {$count['count']}\n";
+        } else {
+            echo "   ❌ Таблица questions НЕ существует!\n";
+
+            // Попытка создать таблицу
+            echo "\n   Пытаюсь создать таблицу questions...\n";
+            $sql = "
+                CREATE TABLE IF NOT EXISTS questions (
+                    id SERIAL PRIMARY KEY,
+                    title VARCHAR(150) NOT NULL,
+                    answers TEXT[] NOT NULL,
+                    correct_answer_index INTEGER NOT NULL CHECK (correct_answer_index >= 0 AND correct_answer_index < array_length(answers, 1)),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ";
+
+            try {
+                $pdo->exec($sql);
+                echo "   ✅ Таблица questions успешно создана!\n";
+            } catch (Exception $e) {
+                echo "   ❌ Ошибка создания: " . $e->getMessage() . "\n";
+            }
+        }
+    } catch (Exception $e) {
+        echo "   ❌ Ошибка: " . $e->getMessage() . "\n";
+    }
+
+    // 3. Проверяем таблицу users (дополнительно)
+    echo "\n3. Таблица users:\n";
     try {
         $stmt = $pdo->query("SELECT EXISTS (
             SELECT FROM information_schema.tables 
@@ -39,42 +95,31 @@ try {
 
         if ($stmt->fetchColumn()) {
             echo "   ✅ Таблица users существует\n";
-
-            // Показываем структуру
-            $columns = $pdo->query("
-                SELECT column_name, data_type, is_nullable
-                FROM information_schema.columns 
-                WHERE table_schema = current_schema()
-                AND table_name = 'users'
-                ORDER BY ordinal_position
-            ")->fetchAll();
-
-            echo "   Структура:\n";
-            foreach ($columns as $col) {
-                echo "   - {$col['column_name']} ({$col['data_type']})\n";
-            }
-
-            // Показываем данные
-            $users = $pdo->query("SELECT COUNT(*) as count FROM users")->fetch();
-            echo "   Записей: {$users['count']}\n";
+            $count = $pdo->query("SELECT COUNT(*) as count FROM users")->fetch();
+            echo "   Записей: {$count['count']}\n";
         } else {
-            echo "   ❌ Таблица users НЕ существует!\n";
+            echo "   ❌ Таблица users НЕ существует\n";
         }
     } catch (Exception $e) {
         echo "   ❌ Ошибка: " . $e->getMessage() . "\n";
     }
 
-    // 3. Проверяем файл миграции
-    echo "\n3. Файл миграции:\n";
-    $migrationFile = __DIR__ . '/../src/Database/migrations/0001_create_users_table.sql';
+    // 4. Проверяем файл миграции
+    echo "\n4. Файл миграции questions:\n";
+    $migrationFile = __DIR__ . '/src/Database/migrations/0002_create_questions_table.sql';
     echo "   Путь: $migrationFile\n";
     echo "   Существует: " . (file_exists($migrationFile) ? '✅ Да' : '❌ Нет') . "\n";
 
-    if (file_exists($migrationFile)) {
-        $content = file_get_contents($migrationFile);
-        echo "   Размер: " . strlen($content) . " байт\n";
-        echo "   Содержимое (первые 200 символов):\n";
-        echo "   " . substr($content, 0, 200) . "...\n";
+    // 5. Проверяем путь к миграциям
+    echo "\n5. Директория миграций:\n";
+    $migrationsDir = __DIR__ . '/src/Database/migrations';
+    echo "   Путь: $migrationsDir\n";
+    echo "   Существует: " . (is_dir($migrationsDir) ? '✅ Да' : '❌ Нет') . "\n";
+
+    if (is_dir($migrationsDir)) {
+        $files = scandir($migrationsDir);
+        $sqlFiles = array_filter($files, fn($f) => str_ends_with($f, '.sql'));
+        echo "   SQL файлы: " . implode(', ', $sqlFiles) . "\n";
     }
 
 } catch (Exception $e) {
