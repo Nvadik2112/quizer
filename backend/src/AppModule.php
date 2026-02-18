@@ -4,7 +4,6 @@ namespace App;
 
 use App\Auth\AuthModule;
 use App\Auth\Exceptions\ValidationException;
-use App\Config\ConfigService;
 use App\Database\DataBaseModule;
 use App\Exceptions\Domain\BadRequestException;
 use App\Exceptions\Domain\ForbiddenException;
@@ -71,6 +70,10 @@ class AppModule
 
             if (preg_match('#^/questions/(\d+)$#', $path, $matches)) {
                 return $questionsController->getQuestion((int)$matches[1]);
+            }
+
+            if (preg_match('#^/questions/check/(\d+)$#', $path, $matches)) {
+                return $questionsController->checkAnswer($request, (int)$matches[1]);
             }
         }
 

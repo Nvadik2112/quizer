@@ -24,10 +24,8 @@ class Application {
     }
 
     private function initialize(): void {
-        // Инициализируем модуль приложения
         $this->appModule = new AppModule();
 
-        // Настраиваем CORS
         $this->setupCors();
     }
 
@@ -65,13 +63,5 @@ class Application {
      */
     private function handleRequest(Request $request): Response {
         return $this->appModule->handle($request);
-    }
-
-    public function getAppModule(): AppModule {
-        return $this->appModule;
-    }
-
-    public function getEnvironment(): string {
-        return $this->environment;
     }
 }

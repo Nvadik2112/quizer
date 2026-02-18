@@ -23,6 +23,11 @@ class UpdateQuestionDto {
         }
 
         if ($this->correctAnswerIndex !== null) {
+
+            if (!is_numeric($correctAnswerIndex)) {
+                throw new \InvalidArgumentException('correctAnswerIndex must be a valid integer');
+            }
+
             QuestionsEntity::validateAnswerIndex($this->correctAnswerIndex);
         }
     }
@@ -32,7 +37,7 @@ class UpdateQuestionDto {
         return new self(
             $data['title'] ?? null,
             $data['answers'] ?? null,
-            $data['correctAnswerIndex'] ?? null
+                $data['correctAnswerIndex'] ?? null
         );
     }
 

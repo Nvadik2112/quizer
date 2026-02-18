@@ -28,7 +28,11 @@ class QuestionsController
     {
         $question = $this->questionsService->findById($id);
 
-        return new JsonResponse($question->toArray());
+        $response = $question->toArray();
+
+        unset($response['correctAnswerIndex']);
+
+        return new JsonResponse($response);
     }
 
     /**
@@ -42,7 +46,10 @@ class QuestionsController
         $data = json_decode($request->getContent(), true);
         $question = $this->questionsService->create($data);
 
-        return new JsonResponse($question, Status::CREATED);
+        $responseData = $question->toArray();
+        $responseData['correctAnswerIndex'] = $question->getCorrectAnswerIndex();
+
+        return new JsonResponse($responseData, Status::CREATED);
     }
 
     /**
@@ -74,9 +81,10 @@ class QuestionsController
     /**
      * @throws NotFoundException
      */
-    public function checkAnswer(int $questionId, int $index): JsonResponse
+    public function checkAnswer(Request $request, int $questionId): JsonResponse
     {
-        $isCorrect = $this->questionsService->checkAnswerIndex($questionId, $index);
+        $data = json_decode($request->getContent(), true);
+        $isCorrect = $this->questionsService->checkAnswerIndex($questionId, $data);
 
         return new JsonResponse($isCorrect);
     }

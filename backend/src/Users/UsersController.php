@@ -68,8 +68,9 @@ class UsersController
      */
     public function deleteUser(Request $request, int $id): JsonResponse
     {
-        $this->jwtGuard->validate($request);
-        $deletedUser = $this->usersService->delete($id);
+        $user = $this->jwtGuard->validate($request);
+        $userData = $this->usersService->findById($user['id']);
+        $deletedUser = $this->usersService->delete($id, $userData);
 
         return new JsonResponse($deletedUser->toArray());
     }

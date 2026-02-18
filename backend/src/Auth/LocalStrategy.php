@@ -25,12 +25,10 @@ class LocalStrategy {
      * @throws UnauthorizedException
      */
     public function validate($username, $password) {
-        // Создаем DTO
         $signinDto = new SigninDto();
         $signinDto->username = $username;
         $signinDto->password = $password;
 
-        // Валидируем данные
         $violations = $this->validator->validate($signinDto);
 
         if (count($violations) > 0) {

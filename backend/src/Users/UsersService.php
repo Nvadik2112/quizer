@@ -72,40 +72,6 @@ class UsersService
         return UserEntity::fromArray($data);
     }
 
-    public function findByEmail(string $email): ?UserEntity
-    {
-        $sql = "SELECT * FROM users WHERE email = :email";
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute(['email' => $email]);
-        
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        return $data ? UserEntity::fromArray($data) : null;
-    }
-
-    /**
-     * @throws NotFoundException
-     * @throws BadRequestException
-     */
-    public function search(string $query): array
-    {
-        if (empty($query)) {
-            throw new BadRequestException('Параметр поиска не должен быть пустым');
-        }
-
-        $sql = "SELECT * FROM users WHERE username LIKE :query OR email LIKE :query";
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute(['query' => "%{$query}%"]);
-
-        $usersData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        if (empty($usersData)) {
-            throw new NotFoundException('Пользователи не найдены');
-        }
-
-        return array_map(fn($data) => UserEntity::fromArray($data), $usersData);
-    }
-
     public function findByEmailOrUsername(string $identifier): ?UserEntity
     {
         $sql = "SELECT * FROM users WHERE email = :identifier OR username = :identifier LIMIT 1";
@@ -158,17 +124,6 @@ class UsersService
         return $user;
     }
 
-    /*public function findWishesByUser(int $userId): array
-    {
-        $sql = "SELECT w.* FROM wishes w
-                WHERE w.user_id = :userId";
-        
-       $stmt = $this->connection->prepare($sql);
-        $stmt->execute(['userId' => $userId]);
-        
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }*/
-
     /**
      * @throws ForbiddenException
      */
@@ -199,10 +154,15 @@ class UsersService
 
     /**
      * @throws NotFoundException
+     * @throws ForbiddenException
      */
-    public function delete(int $userId): UserEntity
+    public function delete(int $userId, UserEntity $userData): UserEntity
     {
         $user = $this->findById($userId);
+
+        if ($userData->getId() === $userId) {
+            throw new ForbiddenException('Нельзя удалять самого себя');
+        }
 
         $sql = "DELETE FROM users WHERE id = :id";
         $stmt = $this->connection->prepare($sql);

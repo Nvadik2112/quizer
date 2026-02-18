@@ -26,14 +26,7 @@ class QuestionsService
     public function create($data): QuestionsEntity
     {
         $dto = CreateQuestionDto::fromArray($data);
-
-        $dto->validate();
-
-        $answersArray = '{' . implode(',', array_map(function($answer) {
-                $answer = str_replace('"', '\\"', $answer);
-                $answer = str_replace('\\', '\\\\', $answer);
-                return '"' . $answer . '"';
-            }, $dto->answers)) . '}';
+        $answersArray = QuestionsEntity::answersToString($dto->answers);
 
         $sql = "INSERT INTO questions (title, answers, correct_answer_index, created_at, updated_at)
             VALUES (:title, :answers::text[], :correct_answer_index, NOW(), NOW())";
@@ -68,7 +61,7 @@ class QuestionsService
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$data) {
-            throw new NotFoundException("Вопрос ${$id} не найден");
+            throw new NotFoundException("Вопрос ${id} не найден");
         }
 
         return QuestionsEntity::fromArray($data);
@@ -85,10 +78,12 @@ class QuestionsService
             throw new \InvalidArgumentException('Нет данных для обновления', 400);
         }
 
+        $answersArray = QuestionsEntity::answersToString($dto->answers);
+
         $updateData = array_filter([
             'title' => $dto->title,
-            'answers' => $dto->answers,
-            'correctAnswerIndex' => $dto->correctAnswerIndex,
+            'answers' => $answersArray,
+            'correct_answer_index' => $dto->correctAnswerIndex,
         ], fn($value) => $value !== null);
 
         $setFields = array_map(fn($key) => "{$key} = :{$key}", array_keys($updateData));
@@ -119,15 +114,15 @@ class QuestionsService
     /**
      * @throws NotFoundException
      */
-    public function checkAnswerIndex(int $questionId, int $index): bool
+    public function checkAnswerIndex(int $questionId, $data): bool
     {
         $question = $this->findById($questionId);
-        QuestionsEntity::validateAnswerIndex($index);
+        $dto = UpdateQuestionDto::fromArray($data);
 
-        if ($question['correctAnswerIndex'] === $index) {
-            return true;
+        if ($dto->correctAnswerIndex === null) {
+            throw new \InvalidArgumentException('correctAnswerIndex is required');
         }
 
-        return false;
+        return $question->correctAnswerIndex === $dto->correctAnswerIndex;
     }
 }

@@ -11,7 +11,7 @@ class QuestionsEntity
     private \DateTime $updatedAt;
     private string $title;
     private array $answers;
-    private int $correctAnswerIndex;
+    public int $correctAnswerIndex;
 
     public function __construct(
         string $title,
@@ -69,18 +69,11 @@ class QuestionsEntity
         $this->answers = $answers;
     }
 
-    private function updateAnswers(array $answers): void
-    {
-        $this->setAnswers($answers);
-        $this->updatedAt = new \DateTime();
-    }
-
-    public function getAnswers(): array {
+     public function getAnswers(): array {
         return $this->answers;
     }
 
     public static function validateAnswerIndex(int $index): void {
-        // Проверка на целое число
         $intIndex = filter_var($index, FILTER_VALIDATE_INT);
 
         if ($intIndex === false) {
@@ -162,6 +155,26 @@ class QuestionsEntity
             'id' => $this->id,
             'title' => $this->title,
             'answers' => $this->answers,
+            'correctAnswerIndex' => $this->correctAnswerIndex,
         ];
+    }
+
+    public static function answersToString(array | null $answers): ?string
+    {
+        if ($answers === null) {
+            return null;
+        }
+
+        if (empty($answers)) {
+            return '{}';
+        }
+
+        return  '{' . implode(',', array_map(function($answer) {
+            $answer = str_replace('"', '\\"', $answer);
+            $answer = str_replace('\\', '\\\\', $answer);
+
+            return '"' . $answer . '"';
+            }, $answers)) . '}';
+
     }
 }

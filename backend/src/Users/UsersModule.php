@@ -23,7 +23,6 @@ class UsersModule {
 
     private function initialize(): void {
         $this->services['hashService'] = new HashService();
-
         $this->services['pdo'] = DataBaseModule::getInstance();
 
         $this->services['usersService'] = new UsersService(
@@ -45,13 +44,5 @@ class UsersModule {
 
     public function getUsersController(): UsersController {
         return $this->services['usersController'];
-    }
-
-    public function getHashService(): HashService {
-        return $this->services['hashService'];
-    }
-
-    public function getJwtGuard(): JwtGuard {
-        return $this->services['jwtGuard'];
     }
 }
