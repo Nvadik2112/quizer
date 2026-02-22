@@ -7,5 +7,6 @@ CREATE TABLE IF NOT EXISTS questions (
         correct_answer_index < array_length(answers, 1)
     ),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE CASCADE
 );

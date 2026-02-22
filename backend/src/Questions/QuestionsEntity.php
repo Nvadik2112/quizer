@@ -2,6 +2,7 @@
 
 namespace App\Questions;
 
+use Exception;
 use InvalidArgumentException;
 
 class QuestionsEntity
@@ -11,43 +12,42 @@ class QuestionsEntity
     private \DateTime $updatedAt;
     private string $title;
     private array $answers;
-    public int $correctAnswerIndex;
+    private int $correctAnswerIndex;
+
+    private int $testId;
+
+    private int $position;
 
     public function __construct(
         string $title,
         array $answers,
+        int $position,
+        int $testId,
         int $correctAnswerIndex
     ) {
         $this->setTitle($title);
         $this->setAnswers($answers);
         $this->setCorrectAnswerIndex($correctAnswerIndex);
-
-        $this->createdAt = new \DateTime();
-        $this->updatedAt = new \DateTime();
+        $this->setTestId($testId);
+        $this->setPosition($position);
+        $this->setCreatedAt();
+        $this->setUpdatedAt();
     }
 
-    public static function validateTitle(string $title): void {
+    public static function validateTitle(string $title): void
+    {
         if (strlen($title) < 2 || strlen($title) > 150) {
             throw new InvalidArgumentException('Title must be between 2 and 150 characters');
         }
     }
 
-    public function setTitle(string $title): void {
+    public function setTitle(string $title): void
+    {
         self::validateTitle($title);
         $this->title = $title;
     }
 
-    public function updateTitle(string $title): void
-    {
-        $this->setTitle($title);
-        $this->updatedAt = new \DateTime();
-    }
-
-    public function getTitle(): string {
-        return $this->title;
-    }
-
-    public static function validateAnswer(string $answer): void {
+     public static function validateAnswer(string $answer): void {
         if (strlen($answer) < 1 || strlen($answer) > 20) {
            throw new \InvalidArgumentException('Answer must be between 1 and 20 characters');
         }
@@ -74,25 +74,18 @@ class QuestionsEntity
     }
 
     public static function validateAnswerIndex(int $index): void {
-        $intIndex = filter_var($index, FILTER_VALIDATE_INT);
-
-        if ($intIndex === false) {
-            throw new \InvalidArgumentException('correctAnswerIndex must be a valid integer');
+        if (!is_numeric($index)) {
+            throw new InvalidArgumentException('correctAnswerIndex must be a valid integer');
         }
 
-        if ($intIndex < 0 || $intIndex > 3) {
-            throw new \InvalidArgumentException('Correct answer index must be between 0 and 3');
+        if ($index < 0 || $index > 3) {
+            throw new InvalidArgumentException('correctAnswerIndex must be between 0 and 3');
         }
     }
 
     private function setCorrectAnswerIndex(int $index): void {
         QuestionsEntity::validateAnswerIndex($index);
         $this->correctAnswerIndex = $index;
-    }
-
-    private function updateCorrectAnswerIndex(int $index): void {
-        $this->setCorrectAnswerIndex($index);
-        $this->updatedAt = new \DateTime();
     }
 
    public function getCorrectAnswerIndex(): int {
@@ -107,16 +100,42 @@ class QuestionsEntity
         $this->id = $id;
     }
 
-    public function getCreatedAt(): \DateTime {
-        return $this->createdAt;
+    static function validateTestId(int $testId): void
+    {
+        if (!is_numeric($testId)) {
+            throw new InvalidArgumentException('testId must be a valid integer');
+        }
     }
 
-    public function getUpdatedAt(): \DateTime {
-        return $this->updatedAt;
+    public function setTestId(int $testId): void
+    {
+        self::validateTestId($testId);
+        $this->testId = $testId;
+    }
+
+    static function validatePosition(int $position): void
+    {
+        if (!is_numeric($position)) {
+            throw new InvalidArgumentException('position must be a valid integer');
+        }
+    }
+
+    public function setPosition(int $position): void
+    {
+        self::validatePosition($position);
+        $this->position = $position;
+    }
+
+    private function setCreatedAt(): void {
+        $this->createdAt = new \DateTime();
+    }
+
+    private function setUpdatedAt(): void {
+        $this->updatedAt = new \DateTime();
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public static function fromArray(array $data): self {
         $answers = $data['answers'];
@@ -132,6 +151,8 @@ class QuestionsEntity
         $question = new self(
             $data['title'],
             $answers,
+            $data['position'],
+            $data['test_id'],
             $data['correct_answer_index']
         );
 
@@ -150,12 +171,29 @@ class QuestionsEntity
         return $question;
     }
 
+    public static function validateAll(array $data): void
+    {
+        self::validateTestId($data['test_id']);
+        self::validateTitle($data['title']);
+        self::validateAnswers($data['answers']);
+        self::validatePosition($data['position']);
+
+        foreach ($data['answers'] ?? [] as $answer) {
+            self::validateAnswer($answer);
+        }
+
+        self::validateAnswerIndex(
+            $data['correct_answer_index'],
+        );
+    }
+
     public function toArray(): array {
         return [
             'id' => $this->id,
             'title' => $this->title,
             'answers' => $this->answers,
             'correctAnswerIndex' => $this->correctAnswerIndex,
+            'position' => $this->position,
         ];
     }
 

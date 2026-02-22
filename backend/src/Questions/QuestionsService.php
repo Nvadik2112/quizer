@@ -7,6 +7,7 @@ use App\Exceptions\Domain\NotFoundException;
 use App\Questions\Dto\CreateQuestionDto;
 use App\Questions\Dto\UpdateQuestionDto;
 
+use App\Tests\TestsService;
 use Exception;
 use PDO;
 
@@ -23,7 +24,7 @@ class QuestionsService
      * @throws NotFoundException
      * @throws BadRequestException
      */
-    public function create($data): QuestionsEntity
+    public function create($data, $testId): QuestionsEntity
     {
         $dto = CreateQuestionDto::fromArray($data);
         $answersArray = QuestionsEntity::answersToString($dto->answers);
@@ -36,6 +37,8 @@ class QuestionsService
         $stmt->execute([
             'title' => $dto->title,
             'answers' => $answersArray,
+            'position' => $dto->position,
+            'test_id' => $testId,
             'correct_answer_index' => $dto->correctAnswerIndex,
         ]);
 
@@ -123,6 +126,6 @@ class QuestionsService
             throw new \InvalidArgumentException('correctAnswerIndex is required');
         }
 
-        return $question->correctAnswerIndex === $dto->correctAnswerIndex;
+        return $question->getCorrectAnswerIndex() === $dto->correctAnswerIndex;
     }
 }

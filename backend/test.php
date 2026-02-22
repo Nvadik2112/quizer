@@ -106,7 +106,7 @@ try {
 
     // 4. Проверяем файл миграции
     echo "\n4. Файл миграции questions:\n";
-    $migrationFile = __DIR__ . '/src/Database/migrations/0002_create_questions_table.sql';
+    $migrationFile = __DIR__ . '/src/Database/migrations/0003_create_questions_table.sql';
     echo "   Путь: $migrationFile\n";
     echo "   Существует: " . (file_exists($migrationFile) ? '✅ Да' : '❌ Нет') . "\n";
 

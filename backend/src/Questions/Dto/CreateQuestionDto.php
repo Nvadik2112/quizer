@@ -2,7 +2,6 @@
 
 namespace  App\Questions\Dto;
 
-use App\Exceptions\Domain\BadRequestException;
 use App\Questions\QuestionsEntity;
 use InvalidArgumentException;
 
@@ -11,6 +10,8 @@ class CreateQuestionDto
     public function __construct(
         public string $title,
         public array $answers,
+        public int $position,
+        public int $testId,
         public int $correctAnswerIndex,
     ){
         $this->validate();
@@ -18,14 +19,14 @@ class CreateQuestionDto
 
     public static function fromArray(array $data): self {
         $correctAnswerIndex = $data['correctAnswerIndex'];
-
-        if (!is_numeric($correctAnswerIndex)) {
-            throw new \InvalidArgumentException('correctAnswerIndex must be a valid integer');
-        }
+        $testId = $data['testId'];
+        $position = $data['position'];
 
         return new self(
             $data['title'] ?? '',
             $data['answers'] ?? [],
+                (int)$position ?? 0,
+                (int)$testId,
             (int)$correctAnswerIndex
         );
     }
@@ -35,18 +36,15 @@ class CreateQuestionDto
         return [
             'title' => $this->title,
             'answers' => $this->answers,
+            'position' => $this->position,
+            'testId' => $this->testId,
             'correctAnswerIndex' => $this->correctAnswerIndex,
         ];
     }
 
     public function validate(): void {
-        QuestionsEntity::validateTitle($this->title);
-        QuestionsEntity::validateAnswers($this->answers);
-
-        foreach ($this->answers as $answer) {
-            QuestionsEntity::validateAnswer($answer);
-        }
-
-        QuestionsEntity::validateAnswerIndex($this->correctAnswerIndex);
+        QuestionsEntity::validateAll(
+            [$this->title, $this->answers, $this->correctAnswerIndex]
+        );
     }
 }
