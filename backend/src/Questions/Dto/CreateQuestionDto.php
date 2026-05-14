@@ -3,7 +3,6 @@
 namespace  App\Questions\Dto;
 
 use App\Questions\QuestionsEntity;
-use InvalidArgumentException;
 
 class CreateQuestionDto
 {
@@ -11,7 +10,6 @@ class CreateQuestionDto
         public string $title,
         public array $answers,
         public int $position,
-        public int $testId,
         public int $correctAnswerIndex,
     ){
         $this->validate();
@@ -19,15 +17,13 @@ class CreateQuestionDto
 
     public static function fromArray(array $data): self {
         $correctAnswerIndex = $data['correctAnswerIndex'];
-        $testId = $data['testId'];
         $position = $data['position'];
 
         return new self(
             $data['title'] ?? '',
             $data['answers'] ?? [],
                 (int)$position ?? 0,
-                (int)$testId,
-            (int)$correctAnswerIndex
+                (int)$correctAnswerIndex ?? 0
         );
     }
 
@@ -37,14 +33,19 @@ class CreateQuestionDto
             'title' => $this->title,
             'answers' => $this->answers,
             'position' => $this->position,
-            'testId' => $this->testId,
             'correctAnswerIndex' => $this->correctAnswerIndex,
         ];
     }
 
     public function validate(): void {
-        QuestionsEntity::validateAll(
-            [$this->title, $this->answers, $this->correctAnswerIndex]
-        );
+        QuestionsEntity::validateTitle($this->title);
+        QuestionsEntity::validateAnswers($this->answers);
+
+        foreach ($this->answers as $answer) {
+            QuestionsEntity::validateAnswer($answer);
+        }
+
+        QuestionsEntity::validateAnswerIndex($this->correctAnswerIndex);
+        QuestionsEntity::validatePosition($this->position);
     }
 }

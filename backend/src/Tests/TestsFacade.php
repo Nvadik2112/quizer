@@ -6,7 +6,7 @@ use App\Exceptions\Domain\BadRequestException;
 use App\Exceptions\Domain\NotFoundException;
 use App\Questions\QuestionsEntity;
 use App\Questions\QuestionsService;
-use App\Tests\Dto\CreateTestDto;
+use App\Tests\Dto\CreateTestWithQuestionsDto;
 use Exception;
 use PDO;
 
@@ -32,26 +32,29 @@ class TestsFacade
      * @throws BadRequestException
      * @throws NotFoundException
      */
-    public function createTestWithQuestion(array $data, int $userId): array
+    public function createTestWithQuestions(array $data, int $userId): array
     {
         try {
             $this->connection->beginTransaction();
-            $test = $this->testsService->create($data, $userId);
-            $dto = CreateTestDto::fromArray($data);
+            $dto = CreateTestWithQuestionsDto::fromArray($data);
+            $test = $this->testsService->create($data['test'], $userId);
             $testId = $test->getId();
 
             $questions = [];
-            foreach ($dto->questions as $questionData) {
+            foreach ($dto->getQuestions()  as $questionData) {
                 $questions[] = $this->questionsService->create($questionData, $testId);
             }
 
             $this->connection->commit();
 
             return [
-                'test' => $test,
-                'questions' => $questions
+                'test' => $test->toArray(),
+                'questions' => array_map(function($question) {
+                    return $question->toArray();
+                }, $questions)
             ];
-        } catch (Exception $e) {
+
+        } catch (BadRequestException $e) {
             $this->connection->rollBack();
             throw $e;
         }

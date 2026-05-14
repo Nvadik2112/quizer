@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Questions;
+namespace App\Tests;
 
 use App\Auth\Guards\JwtGuard;
 use App\Database\DataBaseModule as DataBase;
+use App\Questions\QuestionsService;
 use App\Tests\Guards\TestOwnerGuard;
 
-class QuestionsModule
+class TestsModule
 {
-    private static ?QuestionsModule $instance = null;
+    private static ?TestsModule $instance = null;
 
     private array $services = [];
 
@@ -31,19 +32,30 @@ class QuestionsModule
             $this->services['pdo'],
         );
 
+        $this->services['testsService'] = new TestsService(
+            $this->services['pdo'],
+        );
+
         $this->services['questionsService'] = new QuestionsService(
             $this->services['pdo'],
         );
 
-        $this->services['questionsController'] = new QuestionsController(
-            $this->services['questionsService'],
+        $this->services['testsFacade'] = new TestsFacade(
+            $this->services['pdo'],
+            $this->services['testsService'],
+            $this->services['questionsService']
+        );
+
+        $this->services['testsController'] = new TestsController(
+            $this->services['testsService'],
+            $this->services['testsFacade'],
             $this->services['jwtGuard'],
             $this->services['testOwnerGuard']
         );
     }
 
-    public function getQuestionsController(): QuestionsController
+    public function getTestsController(): TestsController
     {
-        return $this->services['questionsController'];
+        return $this->services['testsController'];
     }
 }

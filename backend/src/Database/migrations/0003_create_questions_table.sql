@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS questions (
         correct_answer_index >= 0 AND
         correct_answer_index < array_length(answers, 1)
     ),
+    position INTEGER NOT NULL,
+    test_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE CASCADE

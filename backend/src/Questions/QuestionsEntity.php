@@ -4,6 +4,7 @@ namespace App\Questions;
 
 use Exception;
 use InvalidArgumentException;
+use JsonSerializable;
 
 class QuestionsEntity
 {
@@ -171,28 +172,11 @@ class QuestionsEntity
         return $question;
     }
 
-    public static function validateAll(array $data): void
-    {
-        self::validateTestId($data['test_id']);
-        self::validateTitle($data['title']);
-        self::validateAnswers($data['answers']);
-        self::validatePosition($data['position']);
-
-        foreach ($data['answers'] ?? [] as $answer) {
-            self::validateAnswer($answer);
-        }
-
-        self::validateAnswerIndex(
-            $data['correct_answer_index'],
-        );
-    }
-
     public function toArray(): array {
         return [
             'id' => $this->id,
             'title' => $this->title,
             'answers' => $this->answers,
-            'correctAnswerIndex' => $this->correctAnswerIndex,
             'position' => $this->position,
         ];
     }

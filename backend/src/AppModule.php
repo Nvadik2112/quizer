@@ -10,6 +10,7 @@ use App\Exceptions\Domain\ForbiddenException;
 use App\Exceptions\Domain\NotFoundException;
 use App\Exceptions\Domain\UnauthorizedException;
 use App\Questions\QuestionsModule;
+use App\Tests\TestsModule;
 use App\Users\UsersModule;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,6 +21,7 @@ class AppModule
     private AuthModule $authModule;
     private UsersModule $usersModule;
     private QuestionsModule $questionsModule;
+    private TestsModule $testsModule;
 
     public function __construct()
     {
@@ -28,6 +30,7 @@ class AppModule
         $this->authModule = AuthModule::getInstance();
         $this->usersModule = UsersModule::getInstance();
         $this->questionsModule = QuestionsModule::getInstance();
+        $this->testsModule = TestsModule::getInstance();
     }
 
     /**
@@ -52,12 +55,14 @@ class AppModule
      * @throws ForbiddenException
      * @throws BadRequestException
      * @throws ValidationException
+     * @throws \Exception
      */
     private function route(Request $request, string $path, string $method): JsonResponse
     {
         $authController = $this->authModule->getAuthController();
         $usersController = $this->usersModule->getUsersController();
         $questionsController = $this->questionsModule->getQuestionsController();
+        $testsController = $this->testsModule->getTestsController();
 
         if ($method === 'GET') {
             if ($path === '/users/me') {
@@ -68,12 +73,20 @@ class AppModule
                 return $usersController->getUser((int)$matches[1]);
             }
 
+            if ($path === '/questions') {
+                return $questionsController->getQuestionsByTestId($request);
+            }
+
             if (preg_match('#^/questions/(\d+)$#', $path, $matches)) {
                 return $questionsController->getQuestion((int)$matches[1]);
             }
 
-            if (preg_match('#^/questions/check/(\d+)$#', $path, $matches)) {
+            if (preg_match('#^/questions/(\d+)/check$#', $path, $matches)) {
                 return $questionsController->checkAnswer($request, (int)$matches[1]);
+            }
+
+            if ($path === '/tests') {
+                return $testsController->getTests($request);
             }
         }
 
@@ -89,6 +102,10 @@ class AppModule
             if ($path === '/questions') {
                 return $questionsController->createQuestion($request);
             }
+
+            if ($path === '/tests') {
+                return $testsController->createTest($request);
+            }
         }
 
         if ($method === 'PATCH') {
@@ -99,6 +116,10 @@ class AppModule
             if (preg_match('#^/questions/(\d+)$#', $path, $matches)) {
                 return $questionsController->updateQuestion($request, (int)$matches[1]);
             }
+
+            if (preg_match('#^/tests/(\d+)$#', $path, $matches)) {
+                return $testsController->updateTest($request, (int)$matches[1]);
+            }
         }
 
         if ($method === 'DELETE') {
@@ -108,6 +129,10 @@ class AppModule
 
             if (preg_match('#^/questions/(\d+)$#', $path, $matches)) {
                 return $questionsController->deleteQuestion($request, (int)$matches[1]);
+            }
+
+            if (preg_match('#^/tests/(\d+)$#', $path, $matches)) {
+                return $testsController->deleteTest($request, (int)$matches[1]);
             }
         }
 

@@ -4,6 +4,7 @@ namespace App\Auth\Guards;
 
 use App\Auth\JwtStrategy;
 use App\Database\DataBaseModule;
+use App\Exceptions\Domain\UnauthorizedException;
 use App\Hash\HashService;
 use App\Users\UsersService;
 use Exception;
@@ -30,6 +31,9 @@ class JwtGuard
         return $this->jwtStrategy->validate($request);
     }
 
+    /**
+     * @throws UnauthorizedException
+     */
     public function handle($request): array
     {
         return $this->jwtStrategy->handle($request);

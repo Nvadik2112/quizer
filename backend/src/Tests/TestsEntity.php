@@ -11,9 +11,7 @@ class TestsEntity
     private \DateTime $createdAt;
     private \DateTime $updatedAt;
     private string $title;
-
-    private array $questions;
-    private int $userId;
+    private ?int $userId = null;
 
     public function __construct(
         string $title,
@@ -57,17 +55,31 @@ class TestsEntity
         $this->updatedAt = new \DateTime();
     }
 
+    public function getUserId(): ?int
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(int $userId): void
+    {
+        $this->userId = $userId;
+    }
+
     /**
      * @throws Exception
      */
     public static function fromArray(array $data): self
     {
         $test = new self(
-            $data['title'],
+            $data['title'] ?? '',
         );
 
         if (isset($data['id'])) {
             $test->setId($data['id']);
+        }
+
+        if (isset($data['user_id'])) {
+            $test->setUserId($data['user_id']);
         }
 
         if (isset($data['created_at']) && is_string($data['created_at'])) {
@@ -86,7 +98,6 @@ class TestsEntity
         return [
             'id' => $this->id,
             'title' => $this->title,
-            'userId' => $this->userId,
         ];
     }
 }

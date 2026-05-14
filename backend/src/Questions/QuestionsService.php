@@ -7,7 +7,6 @@ use App\Exceptions\Domain\NotFoundException;
 use App\Questions\Dto\CreateQuestionDto;
 use App\Questions\Dto\UpdateQuestionDto;
 
-use App\Tests\TestsService;
 use Exception;
 use PDO;
 
@@ -24,13 +23,13 @@ class QuestionsService
      * @throws NotFoundException
      * @throws BadRequestException
      */
-    public function create($data, $testId): QuestionsEntity
+    public function create($data, int $testId): QuestionsEntity
     {
         $dto = CreateQuestionDto::fromArray($data);
         $answersArray = QuestionsEntity::answersToString($dto->answers);
 
-        $sql = "INSERT INTO questions (title, answers, correct_answer_index, created_at, updated_at)
-            VALUES (:title, :answers::text[], :correct_answer_index, NOW(), NOW())";
+        $sql = "INSERT INTO questions (title, answers, position, test_id, correct_answer_index, created_at, updated_at)
+            VALUES (:title, :answers::text[], :position, :test_id, :correct_answer_index, NOW(), NOW())";
 
         $stmt = $this->connection->prepare($sql);
 
@@ -87,7 +86,7 @@ class QuestionsService
             'title' => $dto->title,
             'answers' => $answersArray,
             'correct_answer_index' => $dto->correctAnswerIndex,
-        ], fn($value) => $value !== null);
+        ], fn($value) => !is_null($value));
 
         $setFields = array_map(fn($key) => "{$key} = :{$key}", array_keys($updateData));
         $setFields[] = "updated_at = NOW()";
@@ -117,15 +116,36 @@ class QuestionsService
     /**
      * @throws NotFoundException
      */
-    public function checkAnswerIndex(int $questionId, $data): bool
+    public function checkAnswerIndex(int $questionId, int $correctAnswerIndex): bool
     {
+        QuestionsEntity::validateAnswerIndex($correctAnswerIndex);
         $question = $this->findById($questionId);
-        $dto = UpdateQuestionDto::fromArray($data);
 
-        if ($dto->correctAnswerIndex === null) {
-            throw new \InvalidArgumentException('correctAnswerIndex is required');
+        return $question->getCorrectAnswerIndex() === $correctAnswerIndex;
+    }
+
+    /**
+     * @throws BadRequestException
+     * @throws Exception
+     */
+    public function getQuestionsByTestId(int $testId): array
+    {
+        $sql = "SELECT * FROM questions WHERE test_id = :test_id";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute(['test_id' => $testId]);
+
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$data) {
+            throw new BadRequestException("Вопросы не найдены");
         }
 
-        return $question->getCorrectAnswerIndex() === $dto->correctAnswerIndex;
+        $questions = [];
+
+        foreach ($data as $question) {
+            $questions[] = QuestionsEntity::fromArray($question);
+        }
+
+        return $questions;
     }
 }
