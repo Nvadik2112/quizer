@@ -86,7 +86,7 @@ class AppModule
             }
 
             if ($path === '/tests') {
-                return $testsController->getTests($request);
+                return $testsController->getTests();
             }
         }
 
