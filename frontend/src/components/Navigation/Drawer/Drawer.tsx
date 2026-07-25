@@ -10,6 +10,7 @@ interface DrawerProps {
 
 const Drawer = (props: DrawerProps) => {
   const links = [
+    { to: '/', label: 'Список' },
     { to: 'Auth', label: 'Авторизация'}
   ]
 
@@ -18,7 +19,7 @@ const Drawer = (props: DrawerProps) => {
       <nav className={`Drawer ${ !props.isOpen ? `Drawer--close` : ''}`}>
         <ul>
           {links.map((link) => (
-            <li key={link.to}>
+            <li key={link.to} onClick={props.onClose}>
               <NavLink to={link.to}>
                 {link.label}
               </NavLink>

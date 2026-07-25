@@ -5,9 +5,10 @@ import Drawer from "@/components/Navigation/Drawer/Drawer.tsx";
 import MenuToggle from "@/components/Navigation/MenuToggle/MenuToggle.tsx";
 
 const Layout: React.FC = () => {
-  const [isOpened, setIsOpened ] = useState<boolean>(true);
+  const [isOpened, setIsOpened ] = useState<boolean>(false);
 
   const toggleDrawer = () => {
+    console.log(1)
     setIsOpened((prev: boolean) => !prev);
   };
 

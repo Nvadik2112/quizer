@@ -4,7 +4,8 @@ import { createBrowserRouter } from 'react-router-dom';
 // Компоненты
 import Layout from '@/layouts/Layout.tsx';
 import React from "react";
-import Home from '@/pages/Home';
+import Home from '@/pages/Home/Home.tsx';
+import Quiz from "@/pages/Quiz/Quiz.tsx";
 // import About from '@/pages/About';
 // import Todos from '@/pages/Todos';
 // import TodoDetail from '@/pages/TodoDetail';
@@ -39,31 +40,10 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: 'todos',
-        children: [
-          {
-            index: true,
-            // element: <Todos />,
-          },
-          {
-            path: ':id',
-            // element: <TodoDetail />,
-          },
-        ],
-      },
-      {
-        path: 'about',
-        // element: <About />,
+        path: 'quiz/:id',
+        element: <Quiz />,
       },
     ],
-  },
-  {
-    path: '/login',
-    //element: <Login />,
-  },
-  {
-    path: '*',
-    // element: <NotFound />,
   },
 ]);
 
