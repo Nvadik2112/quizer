@@ -4,13 +4,13 @@ import './AnswerItem.css'
 const AnswerItem = (props) => {
   const classes =["AnswerItem"];
 
-  if (props.state) {
-    classes.push(`AnswerItem--${props.state}`);
+  if (props.status) {
+    classes.push(`AnswerItem--${props.status}`);
   }
 
   return (
     <li className={classes.join(' ')}
-        onClick={()=> props.onAnswerClick(props.answer)}>
+        onClick={()=> props.onAnswerClick(props.index)}>
       { props.answer }
     </li>
   )

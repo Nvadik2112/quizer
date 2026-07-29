@@ -1,34 +1,78 @@
 import './Quiz.css';
 import { useParams } from "react-router-dom";
-import {useEffect, useMemo, useRef, useState} from "react";
+import { useEffect, useMemo, useState} from "react";
 import ActiveQuiz from "@/components/ActiveQuiz/ActiveQuiz.tsx";
 const Quiz = () => {
   const { id } = useParams<{ id: string }>();
 
   const [questions, setQuestions] = useState<any[]>([]);
+  const [questionAnswers, setState] = useState();
 
   useEffect(() => {
     fetch(`http://localhost:8000/questions?testId=${id}`)
       .then(res => res.json())
       .then(data => {
         setQuestions(data);
-        console.log('✅ Данные с сервера:', questions);
+
+        const initialAnswers = Object.fromEntries(
+          data.map((_question: any, index: any) => [
+            index,
+            {
+              answerIndex: null,
+              status: ''
+            }
+          ])
+        );
+
+        // @ts-ignore
+        setState(initialAnswers);
       })
       .catch(err => {
         console.error('❌ Ошибка:', err);
         // setLoading(false);
       });
+
+
   }, []);
 
-  const activeIndex = useRef(0)
+  const [activeIndex] = useState(0)
 
-  const currentQuestion = useMemo(() => {
-    return questions[activeIndex.current]
+  const currentQuestion = useMemo((): any => {
+    return questions[activeIndex]
   }, [questions]);
 
-  console.log((currentQuestion));
+  const currentQuestionAnswer = useMemo((): any => {
+    if (questionAnswers) {
+      return questionAnswers[activeIndex];
+    }
 
-  // @ts-ignore
+    return null;
+
+  }, [questionAnswers]);
+
+
+  const quizAnswerClick = (questionId: number, answerIndex: number) => {
+    if (currentQuestionAnswer?.answerIndex === null) {
+      fetch(`http://localhost:8000/questions/${questionId}/check`, {
+        method: 'POST',
+        body: JSON.stringify({
+          correctAnswerIndex: answerIndex
+        }),
+      }).then(res => res.json())
+        .then(data => {
+          setState((prevState: any) => {
+            return ({
+              ...prevState,
+              [activeIndex]: {
+                answerIndex,
+                status: data ? 'success' : 'error'
+              }
+            });
+          });
+        });
+    }
+  };
+
   return (
     <div className="Quiz">
       <div className="QuizWrapper">
@@ -38,14 +82,13 @@ const Quiz = () => {
             <ActiveQuiz
               answers={currentQuestion.answers}
               question={currentQuestion.title}
-              // onAnswerClick={this.props.quizAnswerClick}
+              onAnswerClick={(answerIndex: number) => quizAnswerClick(currentQuestion.id, answerIndex)}
               quizLength={questions.length}
-              answerNumber={activeIndex.current + 1}
-              state='error'
+              answerNumber={activeIndex + 1}
+              questionAnswer={currentQuestionAnswer}
             />
           )
         }
-
       </div>
     </div>
   )

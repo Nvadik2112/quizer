@@ -81,10 +81,6 @@ class AppModule
                 return $questionsController->getQuestion((int)$matches[1]);
             }
 
-            if (preg_match('#^/questions/(\d+)/check$#', $path, $matches)) {
-                return $questionsController->checkAnswer($request, (int)$matches[1]);
-            }
-
             if ($path === '/tests') {
                 return $testsController->getTests();
             }
@@ -101,6 +97,10 @@ class AppModule
 
             if ($path === '/questions') {
                 return $questionsController->createQuestion($request);
+            }
+
+            if (preg_match('#^/questions/(\d+)/check$#', $path, $matches)) {
+                return $questionsController->checkAnswer($request, (int)$matches[1]);
             }
 
             if ($path === '/tests') {
