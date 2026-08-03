@@ -1,6 +1,6 @@
 import {NavLink} from "react-router-dom";
 import './Drawer.css'
-import Backdrop from "@/components/UI/Backdrop.tsx";
+import Backdrop from "@/components/UI/Backdrop/Backdrop.tsx";
 
 
 interface DrawerProps {

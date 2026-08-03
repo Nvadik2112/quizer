@@ -5,7 +5,6 @@
     flex-grow: 1;
     width: 100%;
     background: linear-gradient(90deg, #c5d346 0%, #aca035 100%);
-
 }
 
 .Quiz h1 {
@@ -13,6 +12,12 @@
     margin-left: 10px;
 }
 
-.QuizWrapper {
+.Quiz__wrap {
     width: 600px;
+}
+
+.Quiz__button {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 10px;
 }
