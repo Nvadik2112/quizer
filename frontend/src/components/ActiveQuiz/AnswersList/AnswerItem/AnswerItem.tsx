@@ -1,16 +1,26 @@
 import './AnswerItem.css'
+import { useQuizStore } from "@/store";
 
-// @ts-ignore
-const AnswerItem = (props) => {
+const AnswerItem = (props: any) => {
   const classes =["AnswerItem"];
 
-  if (props.status) {
-    classes.push(`AnswerItem--${props.status}`);
+  const {
+    getCurrentQuestion,
+    getCurrentQuestionAnswer,
+    quizAnswerClick
+  } = useQuizStore();
+
+  const { answerIndex, status } = getCurrentQuestionAnswer();
+
+  if (answerIndex == props.index) {
+    classes.push(`AnswerItem--${status}`);
   }
+
+  const { id } = getCurrentQuestion();
 
   return (
     <li className={classes.join(' ')}
-        onClick={()=> props.onAnswerClick(props.index)}>
+        onClick={() => quizAnswerClick(id, props.index)}>
       { props.answer }
     </li>
   )

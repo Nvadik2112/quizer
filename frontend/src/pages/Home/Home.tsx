@@ -1,27 +1,16 @@
-import { NavLink } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import './Home.css';
-
-interface Quiz {
-  id: number;
-  title: string;
-}
+import { NavLink } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useQuizStore } from "@/store";
 
 const Home = () => {
-  const [quizes, setQuizes] = useState<Quiz[]>([]);
-  // const [loading, setLoading] = useState(true);
+  const {
+    tests,
+    loadTests
+  } = useQuizStore();
 
   useEffect(() => {
-    fetch('http://localhost:8000/tests')
-      .then(res => res.json())
-      .then(data => {
-        console.log('✅ Данные с сервера:', data);
-        setQuizes(data);
-      })
-      .catch(err => {
-        console.error('❌ Ошибка:', err);
-        // setLoading(false);
-      });
+    loadTests();
   }, []);
 
   return (
@@ -29,10 +18,10 @@ const Home = () => {
       <div>
         <h1>Список тестов</h1>
         <ul>
-          {quizes.map((quiz) => (
-            <li key={quiz.id}>
-              <NavLink to={`/quiz/${quiz.id}`}>
-                {quiz.title}
+          {tests.map((test: any) => (
+            <li key={test.id}>
+              <NavLink to={`/quiz/${test.id}`}>
+                {test.title}
               </NavLink>
             </li>
           ))}

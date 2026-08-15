@@ -1,25 +1,35 @@
 import Button from "@/components/UI/Button/Button.tsx";
 import { Link } from "react-router-dom";
 import './FinishedQuiz.css'
+import { useQuizStore } from "@/store";
 
-const FinishedQuiz = (props: any) => {
-  const successCount = Object.keys(props.results).reduce(
+const FinishedQuiz = () => {
+
+  const {
+    questions,
+    questionAnswers,
+    setTestDefault
+  } = useQuizStore();
+
+  const successCount = Object.keys(questionAnswers).reduce(
     (total, _obj, index) => {
-      if (props.results[index].status === 'success') {
+      if (questionAnswers[index].status === 'success') {
         total++
       }
       return total
     }, 0
   )
 
+  const quizLength = questions.length;
+
   return (
     <div className="FinishedQuiz">
       <ul>
-        {props.questions.map((item: any, index: any) => {
+        {questions.map((item: any, index: any) => {
           const cls = [
             'fa',
-            props.results[index].status === 'error' ? 'fa-times' : 'fa-check',
-            `FinishedQuiz--${props.results[index].status}`,
+            questionAnswers[index].status === 'error' ? 'fa-times' : 'fa-check',
+            `FinishedQuiz--${questionAnswers[index].status}`,
           ]
 
           return (
@@ -33,9 +43,9 @@ const FinishedQuiz = (props: any) => {
           )
         })}
       </ul>
-      <p>Правильно {successCount} из {props.questions.length}</p>
+      <p>Правильно {successCount} из {quizLength}</p>
       <div>
-        <Button onClick={props.onRetry} type='primary'>Повторить</Button>
+        <Button type='primary' onClick={setTestDefault}>Повторить</Button>
         <Link to='/'>
           <Button type='success'>Перейти в список тестов</Button>
         </Link>

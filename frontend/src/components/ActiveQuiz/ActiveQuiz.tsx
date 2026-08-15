@@ -1,22 +1,30 @@
 import AnswersList from "@/components/ActiveQuiz/AnswersList/AnswersList.tsx";
 import './ActiveQuiz.css'
+import { useQuizStore } from "@/store";
 
-// @ts-ignore
-const ActiveQuiz = (props) => (
-  <div className="ActiveQuiz">
-    <p className="Question">
-      <span>
-        <strong>{props.answerNumber}</strong>&nbsp;
-              {props.question}
-      </span>
-      <small>{props.answerNumber} из {props.quizLength}</small>
-    </p>
-    <AnswersList
-      questionAnswer={props.questionAnswer}
-      answers={props.answers}
-      onAnswerClick={props.onAnswerClick}
-    />
-  </div>
-)
+const ActiveQuiz = () => {
+  const {
+    questions,
+    activeIndex,
+    getCurrentQuestion,
+  } = useQuizStore();
+
+  const { title } = getCurrentQuestion();
+  const answerNumber = activeIndex + 1;
+  const quizLength = questions.length;
+
+  return (
+    <div className="ActiveQuiz">
+      <p className="Question">
+        <span>
+          <strong>{answerNumber}</strong>&nbsp;
+          {title}
+        </span>
+        <small>{answerNumber} из {quizLength}</small>
+      </p>
+      <AnswersList />
+    </div>
+  )
+}
 
 export default ActiveQuiz;
