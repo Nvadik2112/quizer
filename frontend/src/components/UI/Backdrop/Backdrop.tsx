@@ -9,6 +9,4 @@ const Backdrop = ({ onClick } : BackdropProps) => {
     <div className='Backdrop' onClick={onClick} />
   );
 };
-
-
 export default Backdrop;

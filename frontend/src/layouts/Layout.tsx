@@ -1,25 +1,14 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
 import './Layout.css';
 import Drawer from "@/components/Navigation/Drawer/Drawer.tsx";
 import MenuToggle from "@/components/Navigation/MenuToggle/MenuToggle.tsx";
 
 const Layout: React.FC = () => {
-  const [isOpened, setIsOpened ] = useState<boolean>(false);
-
-  const toggleDrawer = () => {
-    console.log(1)
-    setIsOpened((prev: boolean) => !prev);
-  };
-
-
   return (
     <div className="Layout">
-      <Drawer isOpen={isOpened} onClose={toggleDrawer} />
-      <MenuToggle
-        onToggle={toggleDrawer}
-        isOpen={isOpened}
-      />
+      <Drawer />
+      <MenuToggle />
       <main>
         <Outlet />
       </main>

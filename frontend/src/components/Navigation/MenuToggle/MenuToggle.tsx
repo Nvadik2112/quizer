@@ -1,14 +1,11 @@
 import './MenuToggle.css'
+import { useMainStore } from "@/store";
 
-interface MenuToggleProps {
-  onToggle: () => void;
-  isOpen: boolean;
-}
-
-const MenuToggle = (props: MenuToggleProps) => {
+const MenuToggle = () => {
+  const { isOpenedMenu, toggleMenu } = useMainStore();
   const classes = ['MenuToggle', 'fas'];
 
-  if (props.isOpen) {
+  if (isOpenedMenu) {
     classes.push('fa-times');
     classes.push('MenuToggle--open');
   } else {
@@ -18,7 +15,7 @@ const MenuToggle = (props: MenuToggleProps) => {
   return (
     <i
       className={classes.join(' ')}
-      onClick={props.onToggle}
+      onClick={toggleMenu}
     />
   )
 }

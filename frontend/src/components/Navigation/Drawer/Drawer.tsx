@@ -1,25 +1,17 @@
-import {NavLink} from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import './Drawer.css'
 import Backdrop from "@/components/UI/Backdrop/Backdrop.tsx";
+import { useMainStore } from "@/store";
 
-
-interface DrawerProps {
-  isOpen: boolean,
-  onClose: () => void;
-}
-
-const Drawer = (props: DrawerProps) => {
-  const links = [
-    { to: '/', label: 'Список' },
-    { to: 'Auth', label: 'Авторизация'}
-  ]
+const Drawer = () => {
+  const { isOpenedMenu, links, toggleMenu } = useMainStore();
 
   return (
     <>
-      <nav className={`Drawer ${ !props.isOpen ? `Drawer--close` : ''}`}>
+      <nav className={`Drawer ${ !isOpenedMenu ? `Drawer--close` : ''}`}>
         <ul>
-          {links.map((link) => (
-            <li key={link.to} onClick={props.onClose}>
+          {links.map((link: any) => (
+            <li key={link.to} onClick={toggleMenu}>
               <NavLink to={link.to}>
                 {link.label}
               </NavLink>
@@ -27,7 +19,7 @@ const Drawer = (props: DrawerProps) => {
           ))}
         </ul>
       </nav>
-      { props.isOpen ? <Backdrop onClick={props.onClose} /> : null }
+      { isOpenedMenu ? <Backdrop onClick={toggleMenu} /> : null }
     </>
   )
 }
