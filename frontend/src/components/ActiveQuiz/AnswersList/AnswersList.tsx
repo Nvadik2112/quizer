@@ -1,6 +1,7 @@
 import './AnswersList.css'
 import AnswerItem from "@/components/ActiveQuiz/AnswersList/AnswerItem/AnswerItem.tsx";
 import { useQuizStore } from "@/store";
+import {ANSWER_INDICES, type AnswerIndex} from "@/types/quiz.ts";
 
 const AnswersList = () => {
   const {
@@ -11,11 +12,17 @@ const AnswersList = () => {
 
   return (
     <ul className="AnswersList">
-      {answers.map((answer: any, index: any) => {
+      {answers.map((answer, index) => {
+        const typedIndex = index as AnswerIndex;
+
+        if (!ANSWER_INDICES.includes(typedIndex)) {
+          return null;
+        }
+
         return (
           <AnswerItem
             key={index}
-            index={index}
+            index={typedIndex}
             answer={answer}
           />
         )

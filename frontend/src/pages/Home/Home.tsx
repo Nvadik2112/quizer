@@ -18,7 +18,7 @@ const Home = () => {
       <div>
         <h1>Список тестов</h1>
         <ul>
-          {tests.map((test: any) => (
+          {tests.map((test) => (
             <li key={test.id}>
               <NavLink to={`/quiz/${test.id}`}>
                 {test.title}

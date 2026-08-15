@@ -10,7 +10,7 @@ const Drawer = () => {
     <>
       <nav className={`Drawer ${ !isOpenedMenu ? `Drawer--close` : ''}`}>
         <ul>
-          {links.map((link: any) => (
+          {links.map((link) => (
             <li key={link.to} onClick={toggleMenu}>
               <NavLink to={link.to}>
                 {link.label}

@@ -4,38 +4,30 @@ import './FinishedQuiz.css'
 import { useQuizStore } from "@/store";
 
 const FinishedQuiz = () => {
-
   const {
     questions,
     questionAnswers,
     setTestDefault
   } = useQuizStore();
 
-  const successCount = Object.keys(questionAnswers).reduce(
-    (total, _obj, index) => {
-      if (questionAnswers[index].status === 'success') {
-        total++
-      }
-      return total
-    }, 0
-  )
+  const successCount = questionAnswers
+    ? Object.values(questionAnswers).filter(a => a.status === 'success').length
+    : null;
 
   const quizLength = questions.length;
 
   return (
     <div className="FinishedQuiz">
       <ul>
-        {questions.map((item: any, index: any) => {
+        {questions.map((item, index) => {
           const cls = [
             'fa',
-            questionAnswers[index].status === 'error' ? 'fa-times' : 'fa-check',
-            `FinishedQuiz--${questionAnswers[index].status}`,
+            questionAnswers && questionAnswers[index].status === 'success' ? 'fa-check' : 'fa-times',
+            `FinishedQuiz--${questionAnswers ? questionAnswers[index].status : 'error'}`,
           ]
 
           return (
-            <li
-              key={index}
-            >
+            <li key={index}>
               <strong>{index + 1}</strong> .&nbsp;
               {item.title}
               <i className={cls.join(' ')} />
@@ -43,7 +35,9 @@ const FinishedQuiz = () => {
           )
         })}
       </ul>
-      <p>Правильно {successCount} из {quizLength}</p>
+      {
+        successCount !== null && <p>Правильно {successCount} из {quizLength}</p>
+      }
       <div>
         <Button type='primary' onClick={setTestDefault}>Повторить</Button>
         <Link to='/'>

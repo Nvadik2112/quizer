@@ -1,6 +1,7 @@
 import { create } from "zustand";
+import type {AnswerIndex, QuestionAnswer, QuizState} from "@/types/quiz.ts";
 
-export const useQuizStore = create<any>((set, get) =>({
+export const useQuizStore = create<QuizState>()((set, get) =>({
   tests: [],
   questions: [],
   questionAnswers: null,
@@ -18,22 +19,18 @@ export const useQuizStore = create<any>((set, get) =>({
     const { questionAnswers, activeIndex } = get();
     const question = get().getCurrentQuestion();
 
-    if (!question) {
+    if (!question || !questionAnswers) {
       return null;
     }
 
-    return questionAnswers[activeIndex] || null;
+    return questionAnswers[activeIndex];
   },
-  setDefaultAnswers: (data: any[]) => {
-    const initialAnswers = Object.fromEntries(
-      data.map((_question: any, index: number) => [
-        index,
-        {
-          answerIndex: null,
-          status: ''
-        }
-      ])
-    );
+  setDefaultAnswers: (data) => {
+    const initialAnswers: QuestionAnswer = {};
+
+    data.forEach((_question, index) => {
+      initialAnswers[index] = { answerIndex: null, status: '' };
+    });
 
     set({ questionAnswers: initialAnswers });
   },
@@ -101,10 +98,13 @@ export const useQuizStore = create<any>((set, get) =>({
       set({ isFinished: true });
     }
   },
-  quizAnswerClick: async (questionId: number, answerIndex: number) => {
+  quizAnswerClick: async (questionId: number, answerIndex: AnswerIndex) => {
     const { questionAnswers, activeIndex } = get();
+    if (!questionAnswers) {
+      return;
+    }
 
-    if (questionAnswers[activeIndex]?.answerIndex !== null) {
+    if (questionAnswers && questionAnswers[activeIndex]?.answerIndex !== null) {
       return;
     }
 
@@ -118,16 +118,17 @@ export const useQuizStore = create<any>((set, get) =>({
 
       const data = await response.json();
 
-      set((state: any) => ({
-        questionAnswers: {
-          ...state.questionAnswers,
-          [activeIndex]: {
-            answerIndex,
-            status: data ? 'success' : 'error'
+      set((state) => {
+        return {
+          questionAnswers: {
+            ...state.questionAnswers,
+            [activeIndex]: {
+              answerIndex: answerIndex,
+              status: data ? 'success' : 'error'
+            }
           }
         }
-      }));
-
+      });
     } catch (error) {
       console.error('❌ Ошибка:', error);
     }

@@ -1,7 +1,13 @@
 import './AnswerItem.css'
 import { useQuizStore } from "@/store";
+import type {AnswerIndex} from "@/types/quiz.ts";
 
-const AnswerItem = (props: any) => {
+interface AnswerItemProps {
+  index: AnswerIndex,
+  answer: string,
+}
+
+const AnswerItem = (props: AnswerItemProps) => {
   const classes =["AnswerItem"];
 
   const {
@@ -10,9 +16,11 @@ const AnswerItem = (props: any) => {
     quizAnswerClick
   } = useQuizStore();
 
-  const { answerIndex, status } = getCurrentQuestionAnswer();
+  const currentQuestionAnswer = getCurrentQuestionAnswer();
+  const answerIndex = currentQuestionAnswer?.answerIndex ?? null;
+  const status = currentQuestionAnswer?.status ?? '';
 
-  if (answerIndex == props.index) {
+  if (answerIndex !== null && answerIndex == props.index) {
     classes.push(`AnswerItem--${status}`);
   }
 
