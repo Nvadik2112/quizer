@@ -61,7 +61,7 @@ export const useQuizStore = create<QuizState>()((set, get) =>({
       console.error('❌ Ошибка:', error)
     }
   },
-  loadQuestions: async (testId: number) => {
+  loadQuestions: async (testId: string) => {
     set({ isLoading: true, error: null });
 
     try {

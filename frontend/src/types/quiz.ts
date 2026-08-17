@@ -31,7 +31,7 @@ export interface QuizState {
   getCurrentQuestionAnswer: () => Answer | null;
   setDefaultAnswers: (questions: Question[]) => void;
   loadTests: () => Promise<void>;
-  loadQuestions: (testId: number) => Promise<void>;
+  loadQuestions: (testId: string) => Promise<void>;
   nextQuestion: () => void;
   quizAnswerClick: (questionId: number, answerIndex: AnswerIndex) => Promise<void>;
   setTestDefault: () => void;

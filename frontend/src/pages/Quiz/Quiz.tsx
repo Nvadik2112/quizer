@@ -5,10 +5,12 @@ import ActiveQuiz from "@/components/ActiveQuiz/ActiveQuiz.tsx";
 import Button from "@/components/UI/Button/Button.tsx";
 import FinishedQuiz from "@/components/FinishedQuiz/FinishedQuiz.tsx";
 import { useQuizStore } from "@/store";
+import Loader from "@/components/UI/Loader/Loader.tsx";
 const Quiz = () => {
   const { id } = useParams<{ id: string }>();
 
   const {
+    isLoading,
     questions,
     activeIndex,
     isFinished,
@@ -20,7 +22,9 @@ const Quiz = () => {
   } = useQuizStore();
 
   useEffect(() => {
-    loadQuestions(id);
+    if (id) {
+      void loadQuestions(id);
+    }
 
     return () => {
       setTestDefault();
@@ -34,20 +38,22 @@ const Quiz = () => {
     ? 'Завершение теста'
     : 'Следующий вопрос';
 
+  const renderContent = () => {
+    if (isLoading) {
+      return <Loader />;
+    }
+    if (currentQuestion && !isFinished) {
+      return <ActiveQuiz />;
+    }
+
+    return <FinishedQuiz />;
+  };
+
   return (
     <div className="Quiz">
       <div className="Quiz__wrap">
         <h1>Пожалуйста ответьте на вопросы</h1>
-        {
-          currentQuestion && !isFinished && (
-            <ActiveQuiz />
-          )
-        }
-        {
-          isFinished && (
-            <FinishedQuiz />
-          )
-        }
+        {renderContent()}
         {
           currentQuestionAnswer?.answerIndex !== null &&
           !isFinished &&
