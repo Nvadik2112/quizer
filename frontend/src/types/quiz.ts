@@ -21,18 +21,16 @@ export type QuestionAnswer = Record<number, Answer>;
 
 export interface QuizState {
   tests: Test[],
-  questions: Question[],
-  questionAnswers: QuestionAnswer | null,
-  activeIndex: number,
-  isFinished: boolean,
-  isLoading: boolean,
-  error: string | null,
-  getCurrentQuestion: () => Question;
-  getCurrentQuestionAnswer: () => Answer | null;
+  questions: Question[];
+  questionAnswers: QuestionAnswer | null;
+  activeIndex: number;
+  isFinished: boolean;
+  getCurrentQuestion: () => Question | null;
+  getCurrentAnswerStatus: () => Answer | null;
   setDefaultAnswers: (questions: Question[]) => void;
-  loadTests: () => Promise<void>;
-  loadQuestions: (testId: string) => Promise<void>;
   nextQuestion: () => void;
-  quizAnswerClick: (questionId: number, answerIndex: AnswerIndex) => Promise<void>;
+  setQuestions: (questions: Question[]) => void;
+  setTests: (tests: Test[]) => void;
   setTestDefault: () => void;
+  setAnswerStatus: (activeIndex: number, answerIndex: AnswerIndex, isCorrect: boolean) => void;
 }

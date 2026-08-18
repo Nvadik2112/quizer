@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type {AnswerIndex, QuestionAnswer, QuizState} from "@/types/quiz.ts";
+import type {Question, QuestionAnswer, QuizState, Test} from "@/types/quiz.ts";
 
 export const useQuizStore = create<QuizState>()((set, get) =>({
   tests: [],
@@ -7,15 +7,13 @@ export const useQuizStore = create<QuizState>()((set, get) =>({
   questionAnswers: null,
   activeIndex: 0,
   isFinished: false,
-  isLoading: false,
-  error: null,
 
   getCurrentQuestion: () => {
     const { questions, activeIndex } = get();
 
     return questions[activeIndex] || null;
   },
-  getCurrentQuestionAnswer: () => {
+  getCurrentAnswerStatus: () => {
     const { questionAnswers, activeIndex } = get();
     const question = get().getCurrentQuestion();
 
@@ -24,6 +22,12 @@ export const useQuizStore = create<QuizState>()((set, get) =>({
     }
 
     return questionAnswers[activeIndex];
+  },
+  setQuestions: (data: Question[]) => {
+    set({ questions: data });
+  },
+  setTests: (data: Test[]) => {
+    set({ tests: data })
   },
   setDefaultAnswers: (data) => {
     const initialAnswers: QuestionAnswer = {};
@@ -34,61 +38,6 @@ export const useQuizStore = create<QuizState>()((set, get) =>({
 
     set({ questionAnswers: initialAnswers });
   },
-  loadTests: async() => {
-    set({ isLoading: true, error: null });
-
-    try {
-      const response = await fetch('http://localhost:8000/tests');
-
-      if (!response.ok) {
-        set({
-          error: 'Ошибка загрузки тестов',
-          isLoading: false
-        });
-
-        return;
-      }
-
-      const data = await response.json();
-      set({ tests: data });
-
-      set({ isLoading: false });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Неизвестная ошибка',
-        isLoading: false
-      });
-      console.error('❌ Ошибка:', error)
-    }
-  },
-  loadQuestions: async (testId: string) => {
-    set({ isLoading: true, error: null });
-
-    try {
-      const response = await fetch(`http://localhost:8000/questions?testId=${testId}`);
-
-      if (!response.ok) {
-        set({
-          error: 'Ошибка загрузки вопросов',
-          isLoading: false
-        });
-      }
-
-      const data = await response.json();
-      set({ questions: data });
-
-      const { setDefaultAnswers } = get();
-      setDefaultAnswers(data);
-
-      set({ isLoading: false });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Неизвестная ошибка',
-        isLoading: false
-      });
-      console.error('❌ Ошибка:', error);
-    }
-  },
   nextQuestion: () => {
     const { activeIndex, questions } = get();
 
@@ -98,44 +47,22 @@ export const useQuizStore = create<QuizState>()((set, get) =>({
       set({ isFinished: true });
     }
   },
-  quizAnswerClick: async (questionId: number, answerIndex: AnswerIndex) => {
-    const { questionAnswers, activeIndex } = get();
-    if (!questionAnswers) {
-      return;
-    }
-
-    if (questionAnswers && questionAnswers[activeIndex]?.answerIndex !== null) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:8000/questions/${questionId}/check`, {
-        method: 'POST',
-        body: JSON.stringify({
-          correctAnswerIndex: answerIndex
-        }),
-      });
-
-      const data = await response.json();
-
-      set((state) => {
-        return {
-          questionAnswers: {
-            ...state.questionAnswers,
-            [activeIndex]: {
-              answerIndex: answerIndex,
-              status: data ? 'success' : 'error'
-            }
-          }
-        }
-      });
-    } catch (error) {
-      console.error('❌ Ошибка:', error);
-    }
-  },
   setTestDefault: () => {
     const { questions, setDefaultAnswers } = get();
     set({ activeIndex: 0, isFinished: false });
     setDefaultAnswers(questions)
   },
+  setAnswerStatus: (activeIndex, answerIndex, isCorrect) => {
+    set((state) => {
+      return {
+        questionAnswers: {
+          ...state.questionAnswers,
+          [activeIndex]: {
+            answerIndex: answerIndex,
+            status: isCorrect ? 'success' : 'error'
+          }
+        }
+      }
+    });
+  }
 }));

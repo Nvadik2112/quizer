@@ -3,17 +3,24 @@ import { NavLink } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useQuizStore } from "@/store";
 import Loader from "@/components/UI/Loader/Loader.tsx";
+import { useTests } from "@/hooks/useQuiz.ts";
 
 const Home = () => {
   const {
+    data,
     isLoading,
+  } = useTests();
+
+  const {
     tests,
-    loadTests
+    setTests,
   } = useQuizStore();
 
   useEffect(() => {
-    void loadTests();
-  }, []);
+    if (data?.length) {
+      setTests(data);
+    }
+  }, [data]);
 
   const renderTests = () => {
     if (isLoading) {

@@ -5,30 +5,36 @@ import type {AnswerIndex} from "@/types/quiz.ts";
 interface AnswerItemProps {
   index: AnswerIndex,
   answer: string,
+  isPending: boolean,
+  handleAnswer: () => void
 }
 
 const AnswerItem = (props: AnswerItemProps) => {
   const classes =["AnswerItem"];
 
   const {
-    getCurrentQuestion,
-    getCurrentQuestionAnswer,
-    quizAnswerClick
+    getCurrentAnswerStatus,
   } = useQuizStore();
 
-  const currentQuestionAnswer = getCurrentQuestionAnswer();
-  const answerIndex = currentQuestionAnswer?.answerIndex ?? null;
-  const status = currentQuestionAnswer?.status ?? '';
+  const currentAnswerStatus = getCurrentAnswerStatus();
+  const answerIndex = currentAnswerStatus?.answerIndex ?? null;
+  const status = currentAnswerStatus?.status ?? '';
+
+  if (status || props.isPending) {
+    classes.push(`AnswerItem--disabled`);
+  }
+
+  if (props.isPending) {
+    classes.push(`AnswerItem--pending`);
+  }
 
   if (answerIndex !== null && answerIndex == props.index) {
     classes.push(`AnswerItem--${status}`);
   }
 
-  const { id } = getCurrentQuestion();
-
   return (
     <li className={classes.join(' ')}
-        onClick={() => quizAnswerClick(id, props.index)}>
+        onClick={props.handleAnswer}>
       { props.answer }
     </li>
   )

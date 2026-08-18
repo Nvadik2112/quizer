@@ -1,14 +1,39 @@
 import './AnswersList.css'
 import AnswerItem from "@/components/ActiveQuiz/AnswersList/AnswerItem/AnswerItem.tsx";
 import { useQuizStore } from "@/store";
-import {ANSWER_INDICES, type AnswerIndex} from "@/types/quiz.ts";
+import { ANSWER_INDICES, type AnswerIndex } from "@/types/quiz.ts";
+import { useCheckAnswer } from "@/hooks/useQuiz.ts";
 
 const AnswersList = () => {
   const {
+    mutate: checkAnswer,
+    isPending
+  } = useCheckAnswer();
+
+  const {
+    activeIndex,
     getCurrentQuestion,
+    setAnswerStatus
   } = useQuizStore();
 
-  const { answers } = getCurrentQuestion();
+  const currentQuestion = getCurrentQuestion();
+
+  if (!currentQuestion) {
+    return;
+  }
+
+  const { answers, id } = currentQuestion;
+
+  const handleAnswer = (answerIndex: AnswerIndex) => {
+    checkAnswer(
+      { questionId: id, answerIndex: answerIndex },
+      {
+        onSuccess: (isCorrect) => {
+          setAnswerStatus(activeIndex, answerIndex, isCorrect);
+        },
+      }
+    );
+  };
 
   return (
     <ul className="AnswersList">
@@ -24,6 +49,8 @@ const AnswersList = () => {
             key={index}
             index={typedIndex}
             answer={answer}
+            isPending={isPending}
+            handleAnswer={() => handleAnswer(typedIndex)}
           />
         )
       })}

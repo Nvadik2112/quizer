@@ -14,6 +14,11 @@
     background: rgba(240, 87, 108, .7)
 }
 
-.AnswerItem:not(.AnswerItem--success):not(.AnswerItem--error):hover {
+.AnswerItem--disabled {
+    pointer-events: none;
+}
+
+.AnswerItem--pending,
+.AnswerItem:hover {
     background: rgba(255, 255, 255, .2);
 }
