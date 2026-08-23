@@ -5,50 +5,29 @@ namespace App\Auth;
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Exceptions\Domain\UnauthorizedException;
-use App\Auth\Dto\SigninDto;
-use App\Auth\Exceptions\ValidationException;
-use App\Constants\Status;
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Users\Dto\CreateUserDto;
 
 class LocalStrategy {
     private AuthService $authService;
-    private ValidatorInterface $validator;
 
     public function __construct($authService) {
         $this->authService = $authService;
-        $this->validator = Validation::createValidator();
     }
 
     /**
-     * @throws ValidationException
      * @throws UnauthorizedException
      */
-    public function validate($username, $password) {
-        $signinDto = new SigninDto();
-        $signinDto->username = $username;
-        $signinDto->password = $password;
+    public function validate($email, $password): array
+    {
+        $credentials = new CreateUserDto($email, $password);
 
-        $violations = $this->validator->validate($signinDto);
-
-        if (count($violations) > 0) {
-            $errors = [];
-            foreach ($violations as $violation) {
-                $errors[] = $violation->getMessage();
-            }
-
-            throw new ValidationException($errors);
-        }
-
-        $user = $this->authService->validatePassword($username, $password);
+        $user = $this->authService->validatePassword(
+            $credentials->email,
+            $credentials->password
+        );
 
         if (!$user) {
-            http_response_code(Status::UNAUTHORIZED);
-            echo json_encode([
-                'error' => 'Unauthorized',
-                'message' => 'Username and password is required'
-            ]);
-            exit;
+            throw new UnauthorizedException('Неверный email или пароль');
         }
 
         return $user;

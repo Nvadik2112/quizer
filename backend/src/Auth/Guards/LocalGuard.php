@@ -6,7 +6,6 @@ require_once __DIR__ . '/../../../vendor/autoload.php';
 
 use App\Auth\AuthService;
 use App\Auth\LocalStrategy;
-use App\Auth\Exceptions\ValidationException;
 use App\Exceptions\Domain\UnauthorizedException;
 use App\Hash\HashService;
 use App\Users\UsersModule;
@@ -24,15 +23,14 @@ class LocalGuard {
     }
 
     /**
-     * @throws ValidationException
      * @throws UnauthorizedException
      */
     public function validate(Request $request): ?array
     {
         $data = json_decode($request->getContent(), true);
-        $username = $data['username'] ?? '';
+        $email = $data['email'] ?? '';
         $password = $data['password'] ?? '';
 
-        return $this->localStrategy->validate($username, $password);
+        return $this->localStrategy->validate($email, $password);
     }
 }

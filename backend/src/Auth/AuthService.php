@@ -27,7 +27,7 @@ class AuthService {
     {
         $payload = [
             'sub' => $user['id'],
-            'username' => $user['username'],
+            'username' => $user['email'],
             'iat' => time(),
             'exp' => time() + (7 * 24 * 60 * 60) // 7 дней
         ];
@@ -44,11 +44,15 @@ class AuthService {
      */
     public function validatePassword($identifier, $password): array
     {
-        $user = $this->usersService->findByEmailOrUsername($identifier);
+        $user = $this->usersService->findByEmail($identifier);
 
         if (!$user) {
-            throw new UnauthorizedException('Учетная запись не найдена');
+            throw new UnauthorizedException(
+                'Учетная запись не найдена. Пожалуйства проверьте правильность email или зарегистрируйтесь'
+            );
         }
+
+        $user->validateEmail($user->getEmail());
 
         if (!$user->verifyPassword($password, $this->hashService)) {
             throw new UnauthorizedException('Неверный пароль');

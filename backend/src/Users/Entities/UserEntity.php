@@ -3,88 +3,52 @@
 namespace App\Users\Entities;
 use App\Constants\Status;
 use App\Hash\HashService;
+use InvalidArgumentException;
 
 class UserEntity {
     private ?int $id = null;
     private \DateTime $createdAt;
     private \DateTime $updatedAt;
-    private string $username;
-    private string $about;
-    private string $avatar;
     private string $email;
     private string $password;
 
     public function __construct(
-        string $username,
         string $email,
         string $password,
-        string $about,
-        string $avatar,
     ) {
-        $this->setUsername($username);
         $this->setEmail($email);
         $this->setPassword($password);
-        $this->setAbout($about);
-        $this->setAvatar($avatar);
 
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
     }
 
-    public static function validateUsername(string $username): void {
-        if (strlen($username) < 2 || strlen($username) > 30) {
-            throw new \InvalidArgumentException('Username must be between 2 and 30 characters');
-        }
-    }
-
     public static function validateEmail(string $email): void {
+        if (!$email) {
+            throw new InvalidArgumentException('Email обязателен');
+        }
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException('Invalid email format');
+            throw new InvalidArgumentException('Неверный формат email');
         }
     }
 
     public static function validatePassword(string $password): void {
-        if (strlen($password) < 3) {
-            throw new \InvalidArgumentException('Password must be at least 3 characters');
+        if (!$password) {
+            throw new InvalidArgumentException('Пароль обязателен');
+        }
+
+        if (strlen($password) < 6) {
+            throw new InvalidArgumentException('Пароль должен содержать не менее 6 символов');
         }
     }
 
-    public static function validateAbout(string $about): void {
-        if (strlen($about) < 2 || strlen($about) > Status::OK) {
-            throw new \InvalidArgumentException('About must be between 2 and 200 characters');
-        }
+    public function getId(): ?int {
+        return $this->id;
     }
 
-    public static function validateAvatar(string $avatar): void {
-        if (!filter_var($avatar, FILTER_VALIDATE_URL)) {
-            throw new \InvalidArgumentException('Invalid avatar URL');
-        }
-    }
-
-    public function getId(): ?int { return $this->id; }
-    public function getCreatedAt(): \DateTime { return $this->createdAt; }
-    public function getUpdatedAt(): \DateTime { return $this->updatedAt; }
-    public function getUsername(): string { return $this->username; }
-    public function getAbout(): string { return $this->about; }
-    public function getAvatar(): string { return $this->avatar; }
-    public function getEmail(): string { return $this->email; }
-
-    public function setUsername(string $username): void {
-        self::validateUsername($username);
-        $this->username = $username;
-        $this->updatedAt = new \DateTime();
-    }
-
-    public function setAbout(string $about): void {
-        self::validateAbout($about);
-        $this->about = $about;
-        $this->updatedAt = new \DateTime();
-    }
-
-    public function setAvatar(string $avatar): void {
-        self::validateAvatar($avatar);
-        $this->avatar = $avatar;
-        $this->updatedAt = new \DateTime();
+    public function getEmail(): string {
+        return $this->email;
     }
 
     public function setEmail(string $email): void {
@@ -105,11 +69,8 @@ class UserEntity {
 
     public static function fromArray(array $data): self {
         $user = new self(
-            $data['username'],
             $data['email'],
             $data['password'],
-            $data['about'] ?? 'Пока ничего не рассказал о себе',
-            $data['avatar'] ?? 'https://i.pravatar.cc/300',
         );
 
         if (isset($data['id'])) {
@@ -130,9 +91,6 @@ class UserEntity {
     public function toArray(): array {
         return [
             'id' => $this->id,
-            'username' => $this->username,
-            'about' => $this->about ?? 'Пока ничего не рассказал о себе',
-            'avatar' => $this->avatar ?? 'https://i.pravatar.cc/300',
             'email' => $this->email,
             'createdAt' => $this->createdAt->format('Y-m-d\TH:i:s.u\Z'),
             'updatedAt' => $this->updatedAt->format('Y-m-d\TH:i:s.u\Z'),

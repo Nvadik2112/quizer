@@ -30,19 +30,16 @@ class UsersService
     public function create($data): UserEntity
     {
         $dto = CreateUserDto::fromArray($data);
-        $this->checkDuplicate($dto->email, $dto->username);
+        $this->checkDuplicate($dto->email);
         $hashedPassword = $this->hashService->hashPassword($dto->password);
 
-        $sql = "INSERT INTO users (username, email, password, about, avatar, created_at, updated_at) 
-            VALUES (:username, :email, :password, :about, :avatar, NOW(), NOW())";
+        $sql = "INSERT INTO users (email, password, created_at, updated_at) 
+            VALUES (:email, :password, NOW(), NOW())";
 
         $stmt = $this->connection->prepare($sql);
         $stmt->execute([
-            'username' => $dto->username,
             'email' => $dto->email,
             'password' => $hashedPassword,
-            'about' => $dto->about,
-            'avatar' => $dto->avatar,
         ]);
 
         $userId = (int)$this->connection->lastInsertId();
@@ -72,9 +69,9 @@ class UsersService
         return UserEntity::fromArray($data);
     }
 
-    public function findByEmailOrUsername(string $identifier): ?UserEntity
+    public function findByEmail(string $identifier): ?UserEntity
     {
-        $sql = "SELECT * FROM users WHERE email = :identifier OR username = :identifier LIMIT 1";
+        $sql = "SELECT * FROM users WHERE email = :identifier LIMIT 1";
         $stmt = $this->connection->prepare($sql);
         $stmt->execute(['identifier' => $identifier]);
 
@@ -95,19 +92,15 @@ class UsersService
             throw new \InvalidArgumentException('Нет данных для обновления', 400);
         }
 
-        if ($dto->email !== null || $dto->username !== null) {
+        if ($dto->email !== null) {
             $currentUser = $this->findById($userId);
-            $email = $dto->email ?? $currentUser->getEmail();
-            $username = $dto->username ?? $currentUser->getUsername();
-            $this->checkDuplicate($email, $username, $userId);
+            $email = $currentUser->getEmail();
+            $this->checkDuplicate($email, $userId);
         }
 
         $updateData = array_filter([
-            'username' => $dto->username,
             'email' => $dto->email,
             'password' => $dto->password ? $this->hashService->hashPassword($dto->password) : null,
-            'about' => $dto->about,
-            'avatar' => $dto->avatar,
         ], fn($value) => $value !== null);
 
         $setFields = array_map(fn($key) => "{$key} = :{$key}", array_keys($updateData));
@@ -127,14 +120,13 @@ class UsersService
     /**
      * @throws ForbiddenException
      */
-    private function checkDuplicate(string $email, string $username, ?int $excludeUserId = null): void
+    private function checkDuplicate(string $email, ?int $excludeUserId = null): void
     {
         $sql = "SELECT COUNT(*) as count FROM users 
-                WHERE (email = :email OR username = :username)";
+                WHERE (email = :email)";
         
         $params = [
             'email' => $email,
-            'username' => $username
         ];
 
         if ($excludeUserId) {
@@ -148,7 +140,7 @@ class UsersService
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($result && $result['count'] > 0) {
-            throw new ForbiddenException('Email или username с таким именем существует');
+            throw new ForbiddenException('Учетная запись с такой почтой уже существует');
         }
     }
 
