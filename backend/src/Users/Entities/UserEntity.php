@@ -1,9 +1,8 @@
 <?php
 
 namespace App\Users\Entities;
-use App\Constants\Status;
+use App\Exceptions\Domain\BadRequestException;
 use App\Hash\HashService;
-use InvalidArgumentException;
 
 class UserEntity {
     private ?int $id = null;
@@ -12,6 +11,9 @@ class UserEntity {
     private string $email;
     private string $password;
 
+    /**
+     * @throws BadRequestException
+     */
     public function __construct(
         string $email,
         string $password,
@@ -23,23 +25,29 @@ class UserEntity {
         $this->updatedAt = new \DateTime();
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public static function validateEmail(string $email): void {
         if (!$email) {
-            throw new InvalidArgumentException('Email обязателен');
+            throw new BadRequestException('Email обязателен');
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidArgumentException('Неверный формат email');
+            throw new BadRequestException('Неверный формат email');
         }
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public static function validatePassword(string $password): void {
         if (!$password) {
-            throw new InvalidArgumentException('Пароль обязателен');
+            throw new BadRequestException('Пароль обязателен');
         }
 
         if (strlen($password) < 6) {
-            throw new InvalidArgumentException('Пароль должен содержать не менее 6 символов');
+            throw new BadRequestException('Пароль должен содержать не менее 6 символов');
         }
     }
 
@@ -51,12 +59,18 @@ class UserEntity {
         return $this->email;
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public function setEmail(string $email): void {
         self::validateEmail($email);
         $this->email = $email;
         $this->updatedAt = new \DateTime();
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public function setPassword(string $password): void {
         self::validatePassword($password);
         $this->password = $password;

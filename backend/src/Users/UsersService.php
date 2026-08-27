@@ -83,13 +83,14 @@ class UsersService
     /**
      * @throws NotFoundException
      * @throws ForbiddenException
+     * @throws BadRequestException
      */
     public function update(int $userId, array $data): UserEntity
     {
         $dto = UpdateUserDto::fromArray($data);
 
         if (!$dto->hasChanges()) {
-            throw new \InvalidArgumentException('Нет данных для обновления', 400);
+            throw new BadRequestException('Нет данных для обновления');
         }
 
         if ($dto->email !== null) {

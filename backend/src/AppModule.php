@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Auth\AuthModule;
-use App\Auth\Exceptions\ValidationException;
 use App\Database\DataBaseModule;
 use App\Exceptions\Domain\BadRequestException;
 use App\Exceptions\Domain\ForbiddenException;
@@ -12,6 +11,8 @@ use App\Exceptions\Domain\UnauthorizedException;
 use App\Questions\QuestionsModule;
 use App\Tests\TestsModule;
 use App\Users\UsersModule;
+use Exception;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,7 +39,6 @@ class AppModule
      * @throws UnauthorizedException
      * @throws ForbiddenException
      * @throws BadRequestException
-     * @throws ValidationException
      */
     public function handle(?Request $request = null): Response
     {
@@ -54,8 +54,7 @@ class AppModule
      * @throws UnauthorizedException
      * @throws ForbiddenException
      * @throws BadRequestException
-     * @throws ValidationException
-     * @throws \Exception
+     * @throws Exception
      */
     private function route(Request $request, string $path, string $method): JsonResponse
     {

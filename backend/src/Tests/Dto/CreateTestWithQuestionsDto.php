@@ -4,7 +4,7 @@ namespace App\Tests\Dto;
 
 use App\Questions\Dto\CreateQuestionDto;
 use App\Tests\TestsEntity;
-use InvalidArgumentException;
+use App\Exceptions\Domain\BadRequestException;
 
 class CreateTestWithQuestionsDto
 {
@@ -34,12 +34,15 @@ class CreateTestWithQuestionsDto
         ];
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public function validate(): void
     {
         TestsEntity::validateTitle($this->test['title']);
 
         if (empty($this->questions)) {
-            throw new InvalidArgumentException('Вопросы к тесту должны быть заполнены');
+            throw new BadRequestException('Вопросы к тесту должны быть заполнены');
         } else {
             foreach ($this->questions as $questionData) {
                 CreateQuestionDto::fromArray($questionData);

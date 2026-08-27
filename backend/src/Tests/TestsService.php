@@ -68,13 +68,13 @@ class TestsService
     }
 
     /**
-     * @throws Exception
+     * @throws BadRequestException
      */
     public function update(int $testId, $dto): TestsEntity {
         $dto = UpdateTestDto::fromArray($dto);
 
         if (!$dto->hasChanges()) {
-            throw new \InvalidArgumentException('Нет данных для обновления', 400);
+            throw new BadRequestException('Нет данных для обновления');
         }
 
         $updateData = [

@@ -2,7 +2,6 @@
 
 namespace App\Auth;
 
-use App\Auth\Exceptions\ValidationException;
 use App\Exceptions\Domain\BadRequestException;
 use App\Exceptions\Domain\ForbiddenException;
 use App\Exceptions\Domain\NotFoundException;
@@ -31,7 +30,6 @@ class AuthController {
 
     /**
      * @throws UnauthorizedException
-     * @throws ValidationException
      */
     public function signin(Request $request): JsonResponse
     {

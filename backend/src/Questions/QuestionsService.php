@@ -71,13 +71,14 @@ class QuestionsService
 
     /**
      * @throws NotFoundException
+     * @throws BadRequestException
      */
     public function update(int $questionId, $data): QuestionsEntity
     {
         $dto = UpdateQuestionDto::fromArray($data);
 
         if (!$dto->hasChanges()) {
-            throw new \InvalidArgumentException('Нет данных для обновления', 400);
+            throw new BadRequestException('Нет данных для обновления');
         }
 
         $answersArray = QuestionsEntity::answersToString($dto->answers);
@@ -115,6 +116,7 @@ class QuestionsService
 
     /**
      * @throws NotFoundException
+     * @throws BadRequestException
      */
     public function checkAnswerIndex(int $questionId, int $correctAnswerIndex): bool
     {

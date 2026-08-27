@@ -2,15 +2,15 @@
 
 namespace App\Questions;
 
+use App\Exceptions\Domain\BadRequestException;
+use DateTime;
 use Exception;
-use InvalidArgumentException;
-use JsonSerializable;
 
 class QuestionsEntity
 {
     private ?int $id = null;
-    private \DateTime $createdAt;
-    private \DateTime $updatedAt;
+    private DateTime $createdAt;
+    private DateTime $updatedAt;
     private string $title;
     private array $answers;
     private int $correctAnswerIndex;
@@ -19,6 +19,9 @@ class QuestionsEntity
 
     private int $position;
 
+    /**
+     * @throws BadRequestException
+     */
     public function __construct(
         string $title,
         array $answers,
@@ -35,31 +38,46 @@ class QuestionsEntity
         $this->setUpdatedAt();
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public static function validateTitle(string $title): void
     {
         if (strlen($title) < 2 || strlen($title) > 150) {
-            throw new InvalidArgumentException('Title must be between 2 and 150 characters');
+            throw new BadRequestException('Title must be between 2 and 150 characters');
         }
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public function setTitle(string $title): void
     {
         self::validateTitle($title);
         $this->title = $title;
     }
 
-     public static function validateAnswer(string $answer): void {
+    /**
+     * @throws BadRequestException
+     */
+    public static function validateAnswer(string $answer): void {
         if (strlen($answer) < 1 || strlen($answer) > 20) {
-           throw new \InvalidArgumentException('Answer must be between 1 and 20 characters');
+           throw new BadRequestException('Answer must be between 1 and 20 characters');
         }
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public static function validateAnswers(array $answers): void {
         if (count($answers) !== 4) {
-            throw new \InvalidArgumentException('There must be exactly 4 answers');
+            throw new BadRequestException('There must be exactly 4 answers');
         }
     }
 
+    /**
+     * @throws BadRequestException
+     */
     private function setAnswers(array $answers): void {
         self::validateAnswers($answers);
 
@@ -74,16 +92,22 @@ class QuestionsEntity
         return $this->answers;
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public static function validateAnswerIndex(int $index): void {
         if (!is_numeric($index)) {
-            throw new InvalidArgumentException('correctAnswerIndex must be a valid integer');
+            throw new BadRequestException('correctAnswerIndex must be a valid integer');
         }
 
         if ($index < 0 || $index > 3) {
-            throw new InvalidArgumentException('correctAnswerIndex must be between 0 and 3');
+            throw new BadRequestException('correctAnswerIndex must be between 0 and 3');
         }
     }
 
+    /**
+     * @throws BadRequestException
+     */
     private function setCorrectAnswerIndex(int $index): void {
         QuestionsEntity::validateAnswerIndex($index);
         $this->correctAnswerIndex = $index;
@@ -101,26 +125,38 @@ class QuestionsEntity
         $this->id = $id;
     }
 
+    /**
+     * @throws BadRequestException
+     */
     static function validateTestId(int $testId): void
     {
         if (!is_numeric($testId)) {
-            throw new InvalidArgumentException('testId must be a valid integer');
+            throw new BadRequestException('testId must be a valid integer');
         }
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public function setTestId(int $testId): void
     {
         self::validateTestId($testId);
         $this->testId = $testId;
     }
 
+    /**
+     * @throws BadRequestException
+     */
     static function validatePosition(int $position): void
     {
         if (!is_numeric($position)) {
-            throw new InvalidArgumentException('position must be a valid integer');
+            throw new BadRequestException('position must be a valid integer');
         }
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public function setPosition(int $position): void
     {
         self::validatePosition($position);
@@ -128,14 +164,15 @@ class QuestionsEntity
     }
 
     private function setCreatedAt(): void {
-        $this->createdAt = new \DateTime();
+        $this->createdAt = new DateTime();
     }
 
     private function setUpdatedAt(): void {
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new DateTime();
     }
 
     /**
+     * @throws BadRequestException
      * @throws Exception
      */
     public static function fromArray(array $data): self {
@@ -162,11 +199,11 @@ class QuestionsEntity
         }
 
         if (isset($data['created_at']) && is_string($data['created_at'])) {
-            $question->createdAt = new \DateTime($data['created_at']);
+            $question->createdAt = new DateTime($data['created_at']);
         }
 
         if (isset($data['updated_at']) && is_string($data['updated_at'])) {
-            $question->updatedAt = new \DateTime($data['updated_at']);
+            $question->updatedAt = new DateTime($data['updated_at']);
         }
 
         return $question;

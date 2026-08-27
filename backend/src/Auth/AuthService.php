@@ -5,6 +5,7 @@ namespace App\Auth;
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Config\ConfigService;
+use App\Exceptions\Domain\BadRequestException;
 use App\Exceptions\Domain\UnauthorizedException;
 use App\Hash\HashService;
 use App\Users\UsersService;
@@ -29,7 +30,7 @@ class AuthService {
             'sub' => $user['id'],
             'username' => $user['email'],
             'iat' => time(),
-            'exp' => time() + (7 * 24 * 60 * 60) // 7 дней
+            'exp' => time() + (7 * 24 * 60 * 60),
         ];
 
         return [
@@ -41,6 +42,7 @@ class AuthService {
 
     /**
      * @throws UnauthorizedException
+     * @throws BadRequestException
      */
     public function validatePassword($identifier, $password): array
     {

@@ -3,7 +3,6 @@
 namespace App\Bootstrap;
 
 use App\AppModule;
-use App\Auth\Exceptions\ValidationException;
 use App\Config\ConfigService;
 use App\Exceptions\Domain\BadRequestException;
 use App\Exceptions\Domain\ForbiddenException;
@@ -46,7 +45,6 @@ class Application {
      * @throws NotFoundException
      * @throws ForbiddenException
      * @throws BadRequestException
-     * @throws ValidationException
      */
     public function run(): void {
         $request = Request::createFromGlobals();
@@ -59,7 +57,6 @@ class Application {
      * @throws NotFoundException
      * @throws ForbiddenException
      * @throws BadRequestException
-     * @throws ValidationException
      */
     private function handleRequest(Request $request): Response {
         return $this->appModule->handle($request);

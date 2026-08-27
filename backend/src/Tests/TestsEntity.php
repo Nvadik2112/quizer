@@ -2,14 +2,15 @@
 
 namespace App\Tests;
 
+use App\Exceptions\Domain\BadRequestException;
+use DateTime;
 use Exception;
-use InvalidArgumentException;
 
 class TestsEntity
 {
     private ?int $id = null;
-    private \DateTime $createdAt;
-    private \DateTime $updatedAt;
+    private DateTime $createdAt;
+    private DateTime $updatedAt;
     private string $title;
     private ?int $userId = null;
 
@@ -22,13 +23,19 @@ class TestsEntity
         $this->setUpdatedAt();
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public static function validateTitle(string $title): void
     {
         if (strlen($title) < 2 || strlen($title) > 30) {
-            throw new InvalidArgumentException('Title must be between 2 and 30 characters');
+            throw new BadRequestException('Title must be between 2 and 30 characters');
         }
     }
 
+    /**
+     * @throws BadRequestException
+     */
     public function setTitle(string $title): void
     {
         self::validateTitle($title);
@@ -47,12 +54,12 @@ class TestsEntity
 
     private function setCreatedAt(): void
     {
-        $this->createdAt = new \DateTime();
+        $this->createdAt = new DateTime();
     }
 
     private function setUpdatedAt(): void
     {
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt = new DateTime();
     }
 
     public function getUserId(): ?int
@@ -83,11 +90,11 @@ class TestsEntity
         }
 
         if (isset($data['created_at']) && is_string($data['created_at'])) {
-            $test->createdAt = new \DateTime($data['created_at']);
+            $test->createdAt = new DateTime($data['created_at']);
         }
 
         if (isset($data['updated_at']) && is_string($data['updated_at'])) {
-            $test->updatedAt = new \DateTime($data['updated_at']);
+            $test->updatedAt = new DateTime($data['updated_at']);
         }
 
         return $test;
