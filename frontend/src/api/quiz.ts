@@ -1,4 +1,4 @@
-import type {Question, Test} from '@/types/quiz';
+import type { Question, Test } from '@/types/quiz';
 import apiClient from "@/api/client.ts";
 
 export const quizApi = {
