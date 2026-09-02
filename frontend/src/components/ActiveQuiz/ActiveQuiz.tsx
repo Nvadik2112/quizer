@@ -9,7 +9,13 @@ const ActiveQuiz = () => {
     getCurrentQuestion,
   } = useQuizStore();
 
-  const { title } = getCurrentQuestion();
+  const currentQuestion = getCurrentQuestion();
+
+  if (!currentQuestion) {
+    return;
+  }
+
+  const { title } = currentQuestion;
   const answerNumber = activeIndex + 1;
   const quizLength = questions.length;
 

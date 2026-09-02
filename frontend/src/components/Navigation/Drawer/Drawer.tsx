@@ -12,6 +12,7 @@ const Drawer = () => {
   const links: Links[] = [
     { to: '/', value: LINK_VALUE.LIST, label: 'Список', visible: true },
     { to: '/auth', value: LINK_VALUE.AUTH, label: 'Авторизация', visible: !isAuthenticated },
+    { to: '/quiz-creator', value: LINK_VALUE.CREATE, label: 'Создать тест', visible: isAuthenticated },
     { to: '/', value:  LINK_VALUE.LOGOUT, label: 'Выйти', visible: isAuthenticated }
   ];
 

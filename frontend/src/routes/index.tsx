@@ -1,36 +1,31 @@
 
-import { createBrowserRouter } from 'react-router-dom';
+import {createBrowserRouter, Navigate} from 'react-router-dom';
 
 import Layout from '@/layouts/Layout.tsx';
 import React from "react";
 import Home from '@/pages/Home/Home.tsx';
 import Quiz from "@/pages/Quiz/Quiz.tsx";
 import Auth from "@/pages/Auth/Auth.tsx";
-// import { useAuthStore } from "@/store/authStore.ts";
-// import About from '@/pages/About';
-// import Todos from '@/pages/Todos';
-// import TodoDetail from '@/pages/TodoDetail';
-// import Login from '@/pages/Login';
-// import NotFound from '@/pages/NotFound';
+import { useAuthStore } from "@/store/authStore.ts";
+import QuizCreator from "@/pages/QuizCreator/QuizCreator.tsx";
 
-// Проверка авторизации
-// const { isAuthenticated } = useAuthStore();
-
-// @ts-ignore
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  // if (!isAuthenticated) {
-  //  return <Navigate to="/" replace />;
-  // }
-  // return children;
+  const { isAuthenticated } = useAuthStore();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      //<ProtectedRoute>
+      <ProtectedRoute>
         <Layout />
-      //</ProtectedRoute>
+      </ProtectedRoute>
     ),
     children: [
       {
@@ -44,6 +39,10 @@ export const router = createBrowserRouter([
       {
         path: 'auth',
         element: <Auth />
+      },
+      {
+        path: 'quiz-creator',
+        element: <QuizCreator />
       }
     ],
   },

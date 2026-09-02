@@ -2,9 +2,9 @@ import './Input.css'
 import type {ChangeEvent, HTMLInputTypeAttribute} from "react";
 
 interface InputProps {
-  invalid: boolean,
-  type: HTMLInputTypeAttribute,
-  label: string,
+  invalid?: boolean,
+  type?: HTMLInputTypeAttribute,
+  label?: string,
   value: string
   onChange: (value: string) => void,
   errorMessage?: string
@@ -25,9 +25,9 @@ const Input = (props: InputProps) => {
 
   return (
     <div className={cls.join(' ')}>
-        <label htmlFor={htmlFor}>
-          {props.label}
-        </label>
+      <label htmlFor={htmlFor}>
+        {props.label}
+      </label>
       <input type={inputType}
              id={htmlFor}
              value={props.value}
